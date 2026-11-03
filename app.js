@@ -124,7 +124,7 @@
       if (submitText) submitText.textContent = strings[lang].formSending;
       try {
         const response = await fetch('https://formsubmit.co/ajax/sasolju999@gmail.com', {
-          method:'POST', body: formData, headers:{Accept:'application/json'}, signal:controller.signal
+          method:'POST', body:JSON.stringify(Object.fromEntries(formData.entries())), headers:{'Content-Type':'application/json',Accept:'application/json'}, signal:controller.signal
         });
         if (!response.ok) throw new Error('Form service HTTP ' + response.status);
         const result = await response.json();
