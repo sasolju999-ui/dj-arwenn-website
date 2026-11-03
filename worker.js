@@ -115,10 +115,117 @@ async function checkAvailability(request, env) {
   }
 }
 
+
+/**
+ * Private owner-only D1 date management.
+ * Unavailable until DJ_ARWENN_ADMIN_TOKEN is configured as a Worker secret.
+ * Never send this token in a URL, persist it in browser storage, or reuse the IP salt.
+ */
+async function sameHash(a, b) {
+  const enc = new TextEncoder();
+  const [left, right] = await Promise.all([
+    crypto.subtle.digest("SHA-256", enc.encode(a)),
+    crypto.subtle.digest("SHA-256", enc.encode(b)),
+  ]);
+  const lhs = new Uint8Array(left);
+  const rhs = new Uint8Array(right);
+  let difference = 0;
+  for (let i = 0; i < lhs.length; i++) difference |= lhs[i] ^ rhs[i];
+  return difference === 0;
+}
+
+async function recordInvalidAdminAttempt(db, hashedIp) {
+  const now = Math.floor(Date.now() / 1000);
+  const bucket = "admin-fail:" + Math.floor(now / 600);
+  const row = await db.prepare(
+    "INSERT INTO availability_checks (visitor, bucket, hits, expires_at) " +
+    "VALUES (?, ?, 1, ?) " +
+    "ON CONFLICT(visitor, bucket) DO UPDATE SET hits=hits+1 RETURNING hits"
+  ).bind(hashedIp, bucket, now + 1200).first();
+  return Boolean(row && row.hits > 10);
+}
+
+async function managePrivateDates(request, env) {
+  if (request.method !== "POST") return reply({ error: "method_not_allowed" }, 405);
+  if (!env.DB || typeof env.DJ_ARWENN_ADMIN_TOKEN !== "string" ||
+      env.DJ_ARWENN_ADMIN_TOKEN.length < 32 ||
+      !env.AVAILABILITY_HASH_SALT || env.AVAILABILITY_HASH_SALT.length < 24) {
+    return reply({ error: "admin_not_configured" }, 503);
+  }
+  const url = new URL(request.url);
+  const origin = request.headers.get("Origin");
+  if (origin && origin !== url.origin) return reply({ error: "forbidden" }, 403);
+  const site = request.headers.get("Sec-Fetch-Site");
+  if (site && site !== "same-origin" && site !== "none") {
+    return reply({ error: "forbidden" }, 403);
+  }
+  if (!(request.headers.get("Content-Type") || "").toLowerCase().startsWith("application/json")) {
+    return reply({ error: "invalid_content_type" }, 415);
+  }
+  if (Number(request.headers.get("Content-Length") || 0) > 1024) {
+    return reply({ error: "invalid_body" }, 413);
+  }
+
+  const tokenHeader = request.headers.get("Authorization") || "";
+  const token = tokenHeader.startsWith("Bearer ") ? tokenHeader.slice(7) : "";
+  const ip = request.headers.get("CF-Connecting-IP");
+  if (!ip) return reply({ error: "unauthorized" }, 401);
+  try {
+    if (token.length < 32 || token.length > 256 ||
+        !(await sameHash(token, env.DJ_ARWENN_ADMIN_TOKEN))) {
+      const fingerprint = await hashIp(ip, env.AVAILABILITY_HASH_SALT);
+      const blocked = await recordInvalidAdminAttempt(env.DB, fingerprint);
+      return reply({ error: blocked ? "rate_limited" : "unauthorized" }, blocked ? 429 : 401);
+    }
+
+    // All admin requests are POST + authenticated. No unauthenticated list endpoint.
+    const raw = await request.text();
+    if (raw.length > 1024) return reply({ error: "invalid_body" }, 413);
+    let payload;
+    try {
+      payload = JSON.parse(raw);
+    } catch (_) {
+      return reply({ error: "invalid_json" }, 400);
+    }
+    if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+      return reply({ error: "invalid_request" }, 400);
+    }
+    const today = currentDateInSlovenia();
+    const end = new Date(today + "T00:00:00Z");
+    end.setUTCFullYear(end.getUTCFullYear() + 2);
+    const last = end.toISOString().slice(0, 10);
+
+    if (payload.action === "list") {
+      const records = await env.DB.prepare(
+        "SELECT date FROM booked_dates WHERE date >= ? AND date <= ? ORDER BY date LIMIT 800"
+      ).bind(today, last).all();
+      return reply({ status: "ok", dates: records.results.map(row => row.date), first: today, last });
+    }
+
+    if (payload.action !== "book" && payload.action !== "release") {
+      return reply({ error: "invalid_action" }, 400);
+    }
+    const date = payload.date;
+    if (!validDate(date) || date < today || date > last) {
+      return reply({ error: "invalid_date" }, 400);
+    }
+    const query = payload.action === "book"
+      ? "INSERT OR IGNORE INTO booked_dates (date) VALUES (?)"
+      : "DELETE FROM booked_dates WHERE date = ?";
+    const update = await env.DB.prepare(query).bind(date).run();
+    if (!update.success) throw new Error("D1 update was unsuccessful");
+    return reply({ status: "ok", date, action: payload.action });
+  } catch (error) {
+    console.error("Private date management failed:", error?.name || "unknown");
+    return reply({ error: "unavailable" }, 503);
+  }
+}
+
 export default {
   async fetch(request, env) {
     const path = new URL(request.url).pathname;
     if (path === "/api/availability") return checkAvailability(request, env);
+    if (path === "/api/admin/dates") return managePrivateDates(request, env);
     if (path.startsWith("/api/")) return reply({ status: "unknown" }, 404);
     return env.ASSETS.fetch(request);
   },

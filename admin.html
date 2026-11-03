@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="sl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#111115">
+  <title>DJ Arwenn | Zasebno upravljanje terminov</title>
+  <style>
+    :root{color-scheme:dark;font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;background:#101014;color:#f7f3f5}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;background:radial-gradient(circle at 15% 0%,#491824 0,transparent 44%),#101014}
+    main{width:min(100% - 28px,690px);margin:0 auto;padding:28px 0 65px}
+    .eyebrow{color:#fb6a86;letter-spacing:.18em;font-size:11px;font-weight:850}
+    h1{font-size:clamp(29px,7vw,43px);letter-spacing:-.04em;line-height:1.07;margin:10px 0 8px}
+    h2{font-size:19px;margin:0 0 14px}
+    p{color:#bdb5bc;line-height:1.65}
+    a{color:#f9aabd}
+    .card{background:#1c1a20;border:1px solid #40343d;border-radius:13px;padding:20px;margin:20px 0;box-shadow:0 18px 48px #0003}
+    .muted{font-size:13px}
+    label{display:block;font-weight:700;margin-bottom:8px;font-size:13px}
+    input{width:100%;min-height:50px;border:1px solid #787079;border-radius:8px;background:#fff;color:#17141a;padding:12px 13px;font-size:16px}
+    input:focus-visible,button:focus-visible{outline:3px solid #ff6381;outline-offset:3px}
+    button{border:1px solid #f03458;border-radius:8px;min-height:49px;background:#df1e44;color:#fff;padding:11px 15px;font-size:14px;font-weight:850;cursor:pointer}
+    button.secondary{background:#28242d;border-color:#71636e}
+    button.danger{background:#47232d;border-color:#bc6178}
+    button:disabled{opacity:.55;cursor:progress}
+    .row{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+    .row>*{flex:1 1 150px}
+    .row>button{flex:0 1 auto}
+    .hint{font-size:12px;color:#ccc3c9}
+    #message:not([hidden]){padding:13px 14px;border:1px solid #9b6470;background:#391d27;color:#fff;border-radius:8px;margin-top:16px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5}
+    #message[data-type=ok]{border-color:#5a987b;background:#1b3b2b}
+    .dates{list-style:none;padding:0;margin:12px 0 0;display:grid;gap:9px}
+    .dates li{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#27232b;border:1px solid #534550;border-radius:9px;padding:11px 12px}
+    .dates li span{font-weight:750}
+    .dates li button{min-height:42px;font-size:12px}
+    [hidden]{display:none!important}
+    .top-link{display:inline-block;margin-top:14px;font-size:13px}
+    @media(max-width:440px){.card{padding:16px}.dates li{gap:6px}.dates li button{padding:9px}.row>button{flex:1 1 100%}}
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="eyebrow">DJ ARWENN / SAMO ZA LASTNIKA</div>
+    <h1>UPRAVLJANJE TERMINOV</h1>
+    <p>Označi zasedene datume ali jih sprosti. Spremembe se zapišejo v zasebno bazo D1.</p>
+    <a class="top-link" href="/" rel="noreferrer">← Nazaj na spletno stran</a>
+  </header>
+  <section class="card" id="login">
+    <h2>Zasebni dostop</h2>
+    <label for="token">Skrbniški ključ</label>
+    <input id="token" type="password" autocomplete="off" spellcheck="false" placeholder="Prilepi svoj zasebni ključ">
+    <p class="hint">Ključ ni isto kot AVAILABILITY_HASH_SALT. Na Cloudflare Workerju mora biti nastavljen kot skrivnost DJ_ARWENN_ADMIN_TOKEN (najmanj 32 znakov). Ključ ostane samo v pomnilniku te strani, ne v shrambi brskalnika.</p>
+    <div class="row"><button id="sign-in" type="button">ODPRI TERMINE</button><button id="make-key" type="button" class="secondary">USTVARI NOV KLJUČ</button></div>
+    <p class="hint" id="generated-help" hidden>Nov ključ kopiraj in ga v Cloudflare nastavi kot skrivnost <strong>DJ_ARWENN_ADMIN_TOKEN</strong>. Ne pošiljaj ga nikomur in ga shrani v upravljalnik gesel. Po shranjevanju klikni »ODPRI TERMINE«.</p>
+  </section>
+  <section id="manager" hidden>
+    <section class="card">
+      <div class="row"><h2>Spremeni datum</h2><button id="sign-out" class="secondary" type="button">ZAKLENI</button></div>
+      <label for="event-date">Datum dogodka</label>
+      <input id="event-date" type="date" required>
+      <p class="hint">Dodaj samo potrjene rezervacije. Povpraševanje še ne pomeni zasedenega termina.</p>
+      <div class="row"><button id="book" type="button">OZNAČI KOT ZASEDENO</button><button id="release" class="secondary" type="button">SPROSTI DATUM</button></div>
+    </section>
+    <section class="card">
+      <div class="row"><h2>Zasedeni prihodnji termini</h2><button id="refresh" class="secondary" type="button">OSVEŽI</button></div>
+      <p id="empty" class="muted" hidden>Trenutno ni vpisanih prihodnjih zasedenih datumov.</p>
+      <ul id="dates" class="dates"></ul>
+    </section>
+  </section>
+  <div id="message" role="status" aria-live="polite" hidden></div>
+</main>
+<script>
+(() => {
+  'use strict';
+  const el = id => document.getElementById(id);
+  const login = el('login'), manager = el('manager'), tokenField = el('token');
+  const dateField = el('event-date'), message = el('message'), datesList = el('dates');
+  let token = '';
+  let busy = false;
+  let earliest = '';
+  let latest = '';
+  const fmt = value => new Intl.DateTimeFormat('sl-SI',{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(value+'T12:00:00Z'));
+  function notice(text, ok=false){
+    message.hidden=false;message.dataset.type=ok?'ok':'error';message.textContent=text;
+  }
+  function lock(){
+    token='';tokenField.value='';manager.hidden=true;login.hidden=false;datesList.replaceChildren();
+    notice('Upravljanje je zaklenjeno.');
+  }
+  async function call(action, date){
+    const response=await fetch('/api/admin/dates',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body:JSON.stringify(date?{action,date}:{action}),
+      cache:'no-store',
+      credentials:'same-origin',
+      referrerPolicy:'no-referrer'
+    });
+    const data=await response.json().catch(()=>({}));
+    if(response.status===401)throw Error('Napačen skrbniški ključ.');
+    if(response.status===429)throw Error('Preveč neuspešnih poskusov. Poskusi pozneje.');
+    if(response.status===503 && data.error==='admin_not_configured')throw Error('V Cloudflare še ni nastavljena skrivnost DJ_ARWENN_ADMIN_TOKEN.');
+    if(!response.ok||data.status!=='ok')throw Error('Zahteva ni uspela. Preveri povezavo in poskusi znova.');
+    return data;
+  }
+  function setBusy(value){
+    busy=value;
+    ['sign-in','book','release','refresh'].forEach(id=>el(id).disabled=value);
+  }
+  async function refresh(){
+    const data=await call('list');
+    earliest=data.first;latest=data.last;
+    dateField.min=earliest;dateField.max=latest;
+    const today=dateField.value;
+    if(!today||today<earliest||today>latest)dateField.value=earliest;
+    datesList.replaceChildren();
+    for(const date of data.dates){
+      const li=document.createElement('li');
+      const label=document.createElement('span');label.textContent=fmt(date);
+      const button=document.createElement('button');button.type='button';button.className='danger';button.textContent='SPROSTI';
+      button.addEventListener('click',()=>change('release',date));
+      li.append(label,button);datesList.append(li);
+    }
+    el('empty').hidden=data.dates.length!==0;
+  }
+  async function run(callback){
+    if(busy)return;
+    setBusy(true);
+    try{await callback()}catch(error){notice(error.message||'Napaka povezave.')}finally{setBusy(false)}
+  }
+  async function change(action, date){
+    if(!date||date<earliest||date>latest){notice('Izberi veljaven datum.');return}
+    if(action==='release'&&!confirm('Res želiš sprostiti '+fmt(date)+'?'))return;
+    await run(async()=>{
+      await call(action,date);
+      await refresh();
+      notice(action==='book'?'Datum '+fmt(date)+' je označen kot zaseden.':'Datum '+fmt(date)+' je ponovno sproščen.',true);
+    });
+  }
+  el('sign-in').addEventListener('click',()=>run(async()=>{
+    token=tokenField.value.trim();
+    if(token.length<32){notice('Vnesi skrbniški ključ z najmanj 32 znaki.');token='';return}
+    await refresh();
+    tokenField.value='';
+    login.hidden=true;manager.hidden=false;
+    notice('Dostop je uspešno potrjen.',true);
+  }));
+  el('sign-out').addEventListener('click',lock);
+  el('refresh').addEventListener('click',()=>run(async()=>{await refresh();notice('Seznam je osvežen.',true)}));
+  el('book').addEventListener('click',()=>change('book',dateField.value));
+  el('release').addEventListener('click',()=>change('release',dateField.value));
+  el('make-key').addEventListener('click',()=>{
+    const bytes=crypto.getRandomValues(new Uint8Array(48));
+    const value=Array.from(bytes,x=>x.toString(16).padStart(2,'0')).join('');
+    tokenField.type='text';tokenField.value=value;el('generated-help').hidden=false;
+    tokenField.focus();tokenField.select();
+    notice('Ustvarjen je nov ključ. Kopiraj ga v Cloudflare in v upravljalnik gesel; tukaj še ni aktiviran.');
+  });
+  window.addEventListener('pagehide',()=>{token=''});
+})();
+</script>
+</body>
+</html>
