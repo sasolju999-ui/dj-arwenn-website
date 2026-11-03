@@ -3,6 +3,7 @@
   'use strict';
   const strings = {
     sl: {
+      calendarLegend:'Zasedeni datumi so označeni sivo.',
       heroArea:'⌖ OBMOČJE NASTOPOV: OD PREKMURJA DO CELJA',
       faqKicker:'DOBRO JE VEDETI',faqTitle:'PREDEN SE<br><em>DOGOVORIMO.</em>',
       faq1Q:'Kje nastopa DJ Arwenn?',faq1A:'Na dogodkih od Prekmurja do Celja. Za termin in lokacijo mi pošlji povpraševanje.',
@@ -11,10 +12,10 @@
       faq4Q:'Kako preverim prost termin?',faq4A:'Piši na Messenger ali pošlji povpraševanje z datumom in krajem dogodka. Odgovorim po preverjanju termina.',
       privacyLink:'ZASEBNOST',formOpenMail:'ODPRI E-POŠTO',formOpenMessenger:'MESSENGER',
       formRecover:'Oddaja ni bila potrjena. Podatki ostanejo v obrazcu; pošlji povpraševanje prek e-pošte ali Messengerja.',
-      formSending:'POŠILJANJE ...',formSuccess:'Storitev je sprejela povpraševanje. Če je to prva oddaja, bo morda potrebna potrditev prejemnega naslova. Dostavo preverim v e-pošti.',
+      formSending:'POŠILJANJE ...',formSuccess:'Povpraševanje je Web3Forms sprejel. Za dokončno potrditev preveri še, ali je sporočilo prispelo v nabiralnik.',
       formFailure:'Zunanja storitev se ni odzvala ali oddaje ni potrdila. Povpraševanja zato ne moremo šteti kot poslanega.',
-      formServiceNote:'Podatki se pošljejo prek zunanjega ponudnika FormSubmit. Če ta ni dosegljiv, bo na voljo druga možnost stika.',
-      formPrivacy:'Razumem, da bodo moji podatki uporabljeni za odgovor na povpraševanje in posredovani prek storitve FormSubmit. Preberem lahko <a href="zasebnost.html" target="_blank" rel="noopener noreferrer">obvestilo o zasebnosti</a>.',
+      formServiceNote:'Podatki se pošljejo prek zunanjega ponudnika Web3Forms. Če ta ni dosegljiv, bo na voljo druga možnost stika.',
+      formPrivacy:'Razumem, da bodo moji podatki uporabljeni za odgovor na povpraševanje in posredovani prek storitve Web3Forms. Preberem lahko <a href="zasebnost.html" target="_blank" rel="noopener noreferrer">obvestilo o zasebnosti</a>.',
       footerPrivacy:'Brez analitičnih piškotkov · Kontaktni obrazec uporablja zunanjo storitev.',
       heroPortraitTag:'ZA VSE GENERACIJE',genreSloCro:'SLO & CRO POP',genreNarodna:'NARODNA',genreNarodnozabavna:'NARODNOZABAVNA',genreTechHouse:'TECH HOUSE',genreTechno:'TECHNO',genreRock:'ROCK',genrePop:'POP',skip:'Preskoči na vsebino', mobileBook:'PREVERI PROST TERMIN', navServices:'Dogodki',navMusic:'Glasba',navMoments:'Utrinki',navContact:'Kontakt',navCheck:'Preveri termin',
       heroEyebrow:'DJ ZA TVOJE NEPOZABNE TRENUTKE',heroTop:'DOBER VEČER.',heroBottom:'HUD ŽUR.',heroLead:'Od prvega komada do zadnjega refrena. Glasba, ki poveže generacije in spravi družbo na plesišče.',heroCta:'PREVERI PROST TERMIN',heroMore:'POŠLJI POVPRAŠEVANJE',metaOne:'POROKE',metaTwo:'ZABAVE',metaThree:'DOGODKI',
@@ -25,10 +26,11 @@
       contactKicker:'REZERVACIJE IN POVPRAŠEVANJA',contactTitle:'IMAŠ DATUM?<br><em>JAZ IMAM BEAT.</em>',contactLead:'Povej mi, kakšno zabavo pripravljaš. Preveriva termin in skupaj začrtava pravi glasbeni večer.',directMessenger:'PIŠI MI NA MESSENGER',contactNote:'Piši mi prek Messengerja ali pošlji povpraševanje z obrazcem.',
       formTitle:'POŠLJI POVPRAŠEVANJE',formHelp:'Izpolni obrazec. Povpraševanje bom prejel po e-pošti in ti lahko odgovoril neposredno.',fieldType:'VRSTA DOGODKA',typeParty:'Rojstni dan / zasebna zabava',typeWedding:'Poroka',typeBusiness:'Poslovni dogodek',typeClub:'Klub / javna prireditev',typeOther:'Drugo',fieldDate:'DATUM',fieldLocation:'KRAJ DOGODKA',locationPlaceholder:'npr. Ptuj',fieldNotes:'DODATNE INFORMACIJE (NEOBVEZNO)',notesPlaceholder:'Okvirno število gostov, glasbene želje ...',formGenerate:'POŠLJI POVPRAŠEVANJE',messageLabel:'TVOJE SPOROČILO',copyButton:'KOPIRAJ SPOROČILO',copiedButton:'KOPIRANO ✓',copyError:'OZNAČI IN KOPIRAJ SPOROČILO',openMessenger:'ODPRI MESSENGER ↗',messageHelp:'Sporočilo se ne pošlje samodejno. Prilepi ga v Messenger in pošlji.',
       footerTag:'TVOJ VEČER. TVOJ RITEM.',footerPrivacy:'Brez sledilnih piškotkov · Zunanje povezave imajo svoje pogoje.',
-      fieldName:'IME IN PRIIMEK',namePlaceholder:'Ime in priimek',fieldEmail:'E-POŠTA',emailPlaceholder:'ime@primer.si',fieldPhone:'TELEFON (NEOBVEZNO)',phonePlaceholder:'+386 ...',formPrivacy:'Strinjam se, da se posredovani podatki uporabijo za odgovor na povpraševanje. Sporočilo posreduje storitev FormSubmit.',formServiceNote:'Obrazec varno posreduje podatke prek storitve FormSubmit. Uporabim jih samo za odgovor na tvoje povpraševanje.',footerSocialTitle:'POVEŽIMO SE',
+      fieldName:'IME IN PRIIMEK',namePlaceholder:'Ime in priimek',fieldEmail:'E-POŠTA',emailPlaceholder:'ime@primer.si',fieldPhone:'TELEFON (NEOBVEZNO)',phonePlaceholder:'+386 ...',formPrivacy:'Strinjam se, da se posredovani podatki uporabijo za odgovor na povpraševanje. Sporočilo posreduje storitev Web3Forms.',formServiceNote:'Obrazec varno posreduje podatke prek storitve Web3Forms. Uporabim jih samo za odgovor na tvoje povpraševanje.',footerSocialTitle:'POVEŽIMO SE',
       inquiryIntro:'Živjo, DJ Arwenn! Zanima me, ali si prost za naslednji dogodek:',inquiryType:'Vrsta dogodka',inquiryDate:'Datum',inquiryPlace:'Kraj',inquiryNotes:'Dodatne informacije',inquiryClosing:'Mi lahko sporočiš, ali imaš termin prost? Hvala!'
     },
     en: {
+      calendarLegend:'Booked dates are greyed out.',
       heroArea:'⌖ SERVICE AREA: FROM PREKMURJE TO CELJE',
       faqKicker:'GOOD TO KNOW',faqTitle:'BEFORE WE<br><em>PLAN YOUR EVENT.</em>',
       faq1Q:'Where does DJ Arwenn perform?',faq1A:'At events across the area from Prekmurje to Celje. Send the date and location to check availability.',
@@ -37,10 +39,10 @@
       faq4Q:'How can I check availability?',faq4A:'Send a Messenger message or a booking enquiry with the event date and location. I will reply after checking availability.',
       privacyLink:'PRIVACY',formOpenMail:'OPEN EMAIL APP',formOpenMessenger:'MESSENGER',
       formRecover:'Submission could not be confirmed. Your details are still in the form. Please email your enquiry or use Messenger.',
-      formSending:'SENDING ...',formSuccess:'The service accepted your enquiry. First-time activation of the receiving email may be necessary. Delivery should be confirmed in the inbox.',
+      formSending:'SENDING ...',formSuccess:'Web3Forms accepted your enquiry. I will confirm availability after receiving the email.',
       formFailure:'The external service was unavailable or did not confirm submission. We cannot mark your message as sent.',
-      formServiceNote:'Your details are handled by the external provider FormSubmit. If it is unavailable, an alternative contact option will appear.',
-      formPrivacy:'I understand that my details will be used to respond to my enquiry and processed via FormSubmit. Read the <a href="zasebnost.html" target="_blank" rel="noopener noreferrer">privacy notice</a>.',
+      formServiceNote:'Your details are handled by the external provider Web3Forms. If it is unavailable, an alternative contact option will appear.',
+      formPrivacy:'I understand that my details will be used to respond to my enquiry and processed via Web3Forms. Read the <a href="zasebnost.html" target="_blank" rel="noopener noreferrer">privacy notice</a>.',
       footerPrivacy:'No analytics cookies · The contact form uses an external provider.',
       heroPortraitTag:'FOR EVERY GENERATION',genreSloCro:'SLO & CRO POP',genreNarodna:'FOLK',genreNarodnozabavna:'SLOVENIAN FOLK POP',genreTechHouse:'TECH HOUSE',genreTechno:'TECHNO',genreRock:'ROCK',genrePop:'POP',skip:'Skip to content',mobileBook:'CHECK AVAILABILITY',navServices:'Events',navMusic:'Music',navMoments:'Highlights',navContact:'Contact',navCheck:'Check a date',
       heroEyebrow:'THE DJ FOR YOUR BEST MOMENTS',heroTop:'GOOD EVENING.',heroBottom:'GREAT PARTY.',heroLead:'From the first track to the last singalong. Music that brings generations together and fills the dance floor.',heroCta:'CHECK AVAILABILITY',heroMore:'SEND AN ENQUIRY',metaOne:'WEDDINGS',metaTwo:'PARTIES',metaThree:'EVENTS',
@@ -51,7 +53,7 @@
       contactKicker:'BOOKINGS & ENQUIRIES',contactTitle:'GOT A DATE?<br><em>I’VE GOT THE BEAT.</em>',contactLead:'Tell me what you’re planning. Let’s check availability and shape the soundtrack to your night.',directMessenger:'MESSAGE ME ON MESSENGER',contactNote:'Reach me on Messenger or submit a booking request using the form.',
       formTitle:'SEND A BOOKING REQUEST',formHelp:'Fill in the form to send your enquiry to my email so I can reply to you.',fieldType:'EVENT TYPE',typeParty:'Birthday / private party',typeWedding:'Wedding',typeBusiness:'Corporate event',typeClub:'Club / public event',typeOther:'Other',fieldDate:'DATE',fieldLocation:'EVENT LOCATION',locationPlaceholder:'e.g. Ptuj',fieldNotes:'ADDITIONAL DETAILS (OPTIONAL)',notesPlaceholder:'Approx. number of guests, music preferences ...',formGenerate:'SEND ENQUIRY',messageLabel:'YOUR MESSAGE',copyButton:'COPY MESSAGE',copiedButton:'COPIED ✓',copyError:'SELECT & COPY MESSAGE',openMessenger:'OPEN MESSENGER ↗',messageHelp:'Your message is not sent automatically. Paste it into Messenger and send it.',
       footerTag:'YOUR NIGHT. YOUR RHYTHM.',footerPrivacy:'No tracking cookies · External links have their own terms.',
-      fieldName:'FULL NAME',namePlaceholder:'Full name',fieldEmail:'EMAIL',emailPlaceholder:'name@example.com',fieldPhone:'PHONE (OPTIONAL)',phonePlaceholder:'+386 ...',formPrivacy:'I agree that the information provided will be used to respond to my enquiry. This form is processed by FormSubmit.',formServiceNote:'This form sends your details via FormSubmit. Your information is used only to answer your enquiry.',footerSocialTitle:'CONNECT WITH ME',
+      fieldName:'FULL NAME',namePlaceholder:'Full name',fieldEmail:'EMAIL',emailPlaceholder:'name@example.com',fieldPhone:'PHONE (OPTIONAL)',phonePlaceholder:'+386 ...',formPrivacy:'I agree that the information provided will be used to respond to my enquiry. This form is processed by Web3Forms.',formServiceNote:'This form sends your details via Web3Forms. Your information is used only to answer your enquiry.',footerSocialTitle:'CONNECT WITH ME',
       inquiryIntro:'Hi DJ Arwenn! I would like to ask about your availability for this event:',inquiryType:'Event type',inquiryDate:'Date',inquiryPlace:'Location',inquiryNotes:'Additional details',inquiryClosing:'Could you let me know if the date is available? Thank you!'
     }
   };
@@ -72,6 +74,7 @@
     });
     langButtons.forEach((b) => {const active = b.dataset.lang === lang; b.classList.toggle('active', active);b.setAttribute('aria-pressed',String(active));});
     document.title = lang === 'sl' ? 'DJ Arwenn | DJ za poroke in zabave – Prekmurje do Celja' : 'DJ Arwenn | Weddings, parties & events – Prekmurje to Celje';
+    document.dispatchEvent(new Event('arwenn:languagechanged'));
   }
   langButtons.forEach((button) => button.addEventListener('click',() => renderLanguage(button.dataset.lang)));
   const menu = choose('menu-toggle');
@@ -81,8 +84,7 @@
   const bars = choose('wave-bars');
   for (let i = 0; i < 63; i++) {const bar = document.createElement('span');const h = 4 + (Math.abs(Math.sin(i * .51) * Math.sin(i * .13)) * 18);bar.style.setProperty('--h',`${h.toFixed(1)}px`);bars.appendChild(bar);}
 
-  // DJ ARWENN FORM RELIABILITY: keep visitors on this page even when FormSubmit fails.
-  // A dedicated Web3Forms access key can be configured here after inbox verification.
+  // DJ ARWENN FORM RELIABILITY: Web3Forms with email/Messenger fallback and live booked-date validation.
   const bookingForm = choose('inquiry-form');
   if (bookingForm) {
     const status = choose('form-status');
@@ -112,8 +114,9 @@
     bookingForm.addEventListener('submit', async (event) => {
       event.preventDefault();
       if (!bookingForm.reportValidity()) return;
+      if (window.DJArwennCalendar && !(await window.DJArwennCalendar.validate())) return;
       const formData = new FormData(bookingForm);
-      if (formData.get('_honey')) return;
+      if (formData.get('botcheck')) return;
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 18000);
       submitButton.disabled = true;
@@ -123,17 +126,18 @@
       status.textContent = strings[lang].formSending;
       if (submitText) submitText.textContent = strings[lang].formSending;
       try {
-        const response = await fetch('https://formsubmit.co/ajax/sasolju999@gmail.com', {
+        const response = await fetch('https://api.web3forms.com/submit', {
           method:'POST', body:JSON.stringify(Object.fromEntries(formData.entries())), headers:{'Content-Type':'application/json',Accept:'application/json'}, signal:controller.signal
         });
-        if (!response.ok) throw new Error('Form service HTTP ' + response.status);
+        if (!response.ok) throw new Error('Web3Forms HTTP ' + response.status);
         const result = await response.json();
         if (!(result && (result.success === true || result.success === 'true'))) {
-          throw new Error('Form submission was not confirmed');
+          throw new Error('Web3Forms submission was not confirmed');
         }
         status.dataset.state = 'success';
         status.textContent = strings[lang].formSuccess;
         bookingForm.reset();
+        document.dispatchEvent(new Event('arwenn:booking-reset'));
       } catch (_error) {
         status.dataset.state = 'error';
         status.textContent = strings[lang].formFailure;
