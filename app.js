@@ -9,9 +9,10 @@
       service1Title:'POROKE',service1Body:'Od nežnih trenutkov do plesišča, ki ne počiva. Glasbena spremljava za vajin dan.',service2Title:'ROJSTNI DNEVI',service2Body:'18-ka, 30-ka, abraham ali kar tako. Najljubši hiti in energija za vse generacije.',service3Title:'POSLOVNI DOGODKI',service3Body:'Zaključki, obletnice in druženja. Pravo vzdušje za sproščen in nepozaben večer.',service4Title:'KLUBI & EVENTI',service4Body:'House, tech house in techno. Seti za večere, ko ritem prevzame glavno besedo.',serviceLink:'POVPRAŠAJ ZA TERMIN <span aria-hidden="true">↗</span>',
       musicKicker:'ZA VSE OKUSE IN VSE GENERACIJE',musicTitle:'KO SE NAJDE<br><em>PRAVI RITEM.</em>',musicLead:'Nobeni dve zabavi nista enaki. Zato tudi ni ene same playliste za vse. Glasbo prilagodim dogodku, gostom in razpoloženju.',musicCta:'POVEJ MI, KAJ NAČRTUJEŠ',musicPanelTitle:'OD KLASIK DO KLUBSKEGA RITMA',
       momentsKicker:'UŠEČKAŠ? NAJPREJ POGLEJ.',momentsTitle:'VZDUŠJE, KI GA<br><em>NE POZABIŠ.</em>',momentsLead:'Najboljše zgodbe nastanejo na plesišču. Poglej utrinke z nastopov in spremljaj dogajanje.',moment1Small:'POGLEJ DOGAJANJE',moment1Title:'UTRINKI Z<br>NASTOPOV',moment2Small:'OSTANI V RITMU',moment2Title:'ZA ODRSKIMI<br>LUČMI',moment3Small:'VSE NA ENEM MESTU',moment3Title:'ŠE VEČ<br>GLASBE',momentButton:'ODPRI PROFIL',
-      contactKicker:'REZERVACIJE IN POVPRAŠEVANJA',contactTitle:'IMAŠ DATUM?<br><em>JAZ IMAM BEAT.</em>',contactLead:'Povej mi, kakšno zabavo pripravljaš. Preveriva termin in skupaj začrtava pravi glasbeni večer.',directMessenger:'PIŠI MI NA MESSENGER',contactNote:'Najhitreje me dosežeš prek Facebook Messengerja.',
-      formTitle:'SESTAVI POVPRAŠEVANJE',formHelp:'Izpolni podatke, pripravi sporočilo in ga kopiraj v Messenger.',fieldType:'VRSTA DOGODKA',typeParty:'Rojstni dan / zasebna zabava',typeWedding:'Poroka',typeBusiness:'Poslovni dogodek',typeClub:'Klub / javna prireditev',typeOther:'Drugo',fieldDate:'DATUM',fieldLocation:'KRAJ DOGODKA',locationPlaceholder:'npr. Ptuj',fieldNotes:'DODATNE INFORMACIJE (NEOBVEZNO)',notesPlaceholder:'Okvirno število gostov, glasbene želje ...',formGenerate:'PRIPRAVI SPOROČILO',messageLabel:'TVOJE SPOROČILO',copyButton:'KOPIRAJ SPOROČILO',copiedButton:'KOPIRANO ✓',copyError:'OZNAČI IN KOPIRAJ SPOROČILO',openMessenger:'ODPRI MESSENGER ↗',messageHelp:'Sporočilo se ne pošlje samodejno. Prilepi ga v Messenger in pošlji.',
+      contactKicker:'REZERVACIJE IN POVPRAŠEVANJA',contactTitle:'IMAŠ DATUM?<br><em>JAZ IMAM BEAT.</em>',contactLead:'Povej mi, kakšno zabavo pripravljaš. Preveriva termin in skupaj začrtava pravi glasbeni večer.',directMessenger:'PIŠI MI NA MESSENGER',contactNote:'Piši mi prek Messengerja ali pošlji povpraševanje z obrazcem.',
+      formTitle:'POŠLJI POVPRAŠEVANJE',formHelp:'Izpolni obrazec. Povpraševanje bom prejel po e-pošti in ti lahko odgovoril neposredno.',fieldType:'VRSTA DOGODKA',typeParty:'Rojstni dan / zasebna zabava',typeWedding:'Poroka',typeBusiness:'Poslovni dogodek',typeClub:'Klub / javna prireditev',typeOther:'Drugo',fieldDate:'DATUM',fieldLocation:'KRAJ DOGODKA',locationPlaceholder:'npr. Ptuj',fieldNotes:'DODATNE INFORMACIJE (NEOBVEZNO)',notesPlaceholder:'Okvirno število gostov, glasbene želje ...',formGenerate:'POŠLJI POVPRAŠEVANJE',messageLabel:'TVOJE SPOROČILO',copyButton:'KOPIRAJ SPOROČILO',copiedButton:'KOPIRANO ✓',copyError:'OZNAČI IN KOPIRAJ SPOROČILO',openMessenger:'ODPRI MESSENGER ↗',messageHelp:'Sporočilo se ne pošlje samodejno. Prilepi ga v Messenger in pošlji.',
       footerTag:'TVOJ VEČER. TVOJ RITEM.',footerPrivacy:'Brez sledilnih piškotkov · Zunanje povezave imajo svoje pogoje.',
+      fieldName:'IME IN PRIIMEK',namePlaceholder:'Ime in priimek',fieldEmail:'E-POŠTA',emailPlaceholder:'ime@primer.si',fieldPhone:'TELEFON (NEOBVEZNO)',phonePlaceholder:'+386 ...',formPrivacy:'Strinjam se, da se posredovani podatki uporabijo za odgovor na povpraševanje. Sporočilo posreduje storitev FormSubmit.',formServiceNote:'Obrazec deluje prek storitve FormSubmit. Pošiljanje bo aktivno po potrditvi e-poštnega naslova prejemnika.',footerSocialTitle:'POVEŽIMO SE',
       inquiryIntro:'Živjo, DJ Arwenn! Zanima me, ali si prost za naslednji dogodek:',inquiryType:'Vrsta dogodka',inquiryDate:'Datum',inquiryPlace:'Kraj',inquiryNotes:'Dodatne informacije',inquiryClosing:'Mi lahko sporočiš, ali imaš termin prost? Hvala!'
     },
     en: {
@@ -21,9 +22,10 @@
       service1Title:'WEDDINGS',service1Body:'From the heartfelt moments to a packed dance floor. Music for your special day.',service2Title:'BIRTHDAYS',service2Body:'Milestone birthdays, anniversaries, or just because. Favourite hits for every generation.',service3Title:'CORPORATE EVENTS',service3Body:'Team parties, celebrations and get-togethers. The right atmosphere for a memorable night.',service4Title:'CLUBS & EVENTS',service4Body:'House, tech house and techno. Sets for nights when the beat takes over.',serviceLink:'ASK ABOUT A DATE <span aria-hidden="true">↗</span>',
       musicKicker:'EVERY TASTE. EVERY GENERATION.',musicTitle:'FINDING<br><em>YOUR RHYTHM.</em>',musicLead:'No two celebrations are alike. There is no one-size-fits-all playlist. I adapt the music to your event, your guests and the mood.',musicCta:'TELL ME YOUR PLANS',musicPanelTitle:'FROM CLASSICS TO CLUB BEATS',
       momentsKicker:'THE VIBE SPEAKS FOR ITSELF',momentsTitle:'NIGHTS TO<br><em>REMEMBER.</em>',momentsLead:'The best stories happen on the dance floor. Explore event highlights and stay connected.',moment1Small:'SEE THE ACTION',moment1Title:'LIVE<br>HIGHLIGHTS',moment2Small:'STAY IN THE LOOP',moment2Title:'BEHIND<br>THE BEATS',moment3Small:'ALL IN ONE PLACE',moment3Title:'MORE<br>MUSIC',momentButton:'VIEW PROFILE',
-      contactKicker:'BOOKINGS & ENQUIRIES',contactTitle:'GOT A DATE?<br><em>I’VE GOT THE BEAT.</em>',contactLead:'Tell me what you’re planning. Let’s check availability and shape the soundtrack to your night.',directMessenger:'MESSAGE ME ON MESSENGER',contactNote:'The easiest way to reach me is via Facebook Messenger.',
-      formTitle:'PREPARE YOUR ENQUIRY',formHelp:'Fill in a few details, generate a message and paste it into Messenger.',fieldType:'EVENT TYPE',typeParty:'Birthday / private party',typeWedding:'Wedding',typeBusiness:'Corporate event',typeClub:'Club / public event',typeOther:'Other',fieldDate:'DATE',fieldLocation:'EVENT LOCATION',locationPlaceholder:'e.g. Ptuj',fieldNotes:'ADDITIONAL DETAILS (OPTIONAL)',notesPlaceholder:'Approx. number of guests, music preferences ...',formGenerate:'PREPARE MESSAGE',messageLabel:'YOUR MESSAGE',copyButton:'COPY MESSAGE',copiedButton:'COPIED ✓',copyError:'SELECT & COPY MESSAGE',openMessenger:'OPEN MESSENGER ↗',messageHelp:'Your message is not sent automatically. Paste it into Messenger and send it.',
+      contactKicker:'BOOKINGS & ENQUIRIES',contactTitle:'GOT A DATE?<br><em>I’VE GOT THE BEAT.</em>',contactLead:'Tell me what you’re planning. Let’s check availability and shape the soundtrack to your night.',directMessenger:'MESSAGE ME ON MESSENGER',contactNote:'Reach me on Messenger or submit a booking request using the form.',
+      formTitle:'SEND A BOOKING REQUEST',formHelp:'Fill in the form to send your enquiry to my email so I can reply to you.',fieldType:'EVENT TYPE',typeParty:'Birthday / private party',typeWedding:'Wedding',typeBusiness:'Corporate event',typeClub:'Club / public event',typeOther:'Other',fieldDate:'DATE',fieldLocation:'EVENT LOCATION',locationPlaceholder:'e.g. Ptuj',fieldNotes:'ADDITIONAL DETAILS (OPTIONAL)',notesPlaceholder:'Approx. number of guests, music preferences ...',formGenerate:'SEND ENQUIRY',messageLabel:'YOUR MESSAGE',copyButton:'COPY MESSAGE',copiedButton:'COPIED ✓',copyError:'SELECT & COPY MESSAGE',openMessenger:'OPEN MESSENGER ↗',messageHelp:'Your message is not sent automatically. Paste it into Messenger and send it.',
       footerTag:'YOUR NIGHT. YOUR RHYTHM.',footerPrivacy:'No tracking cookies · External links have their own terms.',
+      fieldName:'FULL NAME',namePlaceholder:'Full name',fieldEmail:'EMAIL',emailPlaceholder:'name@example.com',fieldPhone:'PHONE (OPTIONAL)',phonePlaceholder:'+386 ...',formPrivacy:'I agree that the information provided will be used to respond to my enquiry. This form is processed by FormSubmit.',formServiceNote:'This form uses FormSubmit. Delivery becomes active after the recipient confirms the email address.',footerSocialTitle:'CONNECT WITH ME',
       inquiryIntro:'Hi DJ Arwenn! I would like to ask about your availability for this event:',inquiryType:'Event type',inquiryDate:'Date',inquiryPlace:'Location',inquiryNotes:'Additional details',inquiryClosing:'Could you let me know if the date is available? Thank you!'
     }
   };
@@ -43,7 +45,6 @@
       if (val) el.placeholder = val;
     });
     langButtons.forEach((b) => {const active = b.dataset.lang === lang; b.classList.toggle('active', active);b.setAttribute('aria-pressed',String(active));});
-    if (!choose('message-result').hidden) generateMessage();
     document.title = lang === 'sl' ? 'DJ Arwenn | Tvoj večer. Tvoja glasba.' : 'DJ Arwenn | Your night. Your music.';
   }
   langButtons.forEach((button) => button.addEventListener('click',() => renderLanguage(button.dataset.lang)));
@@ -57,27 +58,6 @@
   const today = new Date();
   const y = today.getFullYear(),m = String(today.getMonth()+1).padStart(2,'0'),d = String(today.getDate()).padStart(2,'0');
   dateInput.min = `${y}-${m}-${d}`;
-  function generateMessage() {
-    const dict = strings[lang];
-    const type = choose('event-type');
-    const optionLabel = type.options[type.selectedIndex].text;
-    const dateVal = dateInput.value;
-    const dateStr = dateVal ? new Intl.DateTimeFormat(lang === 'sl' ? 'sl-SI' : 'en-GB',{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(`${dateVal}T12:00:00Z`)) : '-';
-    const location = choose('event-location').value.trim();
-    const extra = choose('event-notes').value.trim();
-    const lines = [dict.inquiryIntro,'',`${dict.inquiryType}: ${optionLabel}`,`${dict.inquiryDate}: ${dateStr}`,`${dict.inquiryPlace}: ${location}`];
-    if (extra) lines.push(`${dict.inquiryNotes}: ${extra}`);
-    lines.push('',dict.inquiryClosing);
-    choose('message-preview').value = lines.join('\n');
-  }
-  choose('inquiry-form').addEventListener('submit',(event) => {event.preventDefault();if (!event.currentTarget.reportValidity()) return;generateMessage();choose('message-result').hidden = false;choose('copy-message').textContent = strings[lang].copyButton;choose('message-result').scrollIntoView({behavior:'smooth',block:'nearest'});});
-  choose('copy-message').addEventListener('click',async () => {
-    const text = choose('message-preview').value;
-    let copied = false;
-    try { if(navigator.clipboard && window.isSecureContext){await navigator.clipboard.writeText(text);copied=true;} } catch(e) {copied=false;}
-    if (!copied) {const t = choose('message-preview');t.focus();t.select();try{copied = document.execCommand('copy');}catch(e){copied=false;}}
-    choose('copy-message').textContent = strings[lang][copied ? 'copiedButton' : 'copyError'];
-  });
   choose('year').textContent = String(new Date().getFullYear());
   if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     document.body.classList.add('js-ready');
