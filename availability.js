@@ -2,7 +2,7 @@
 (() => {
   'use strict';
   const get = id => document.getElementById(id);
-  const box = get('availability-check');
+  const box = get('preveri-termin');
   const dateInput = get('availability-date');
   const action = get('availability-button');
   const result = get('availability-result');
