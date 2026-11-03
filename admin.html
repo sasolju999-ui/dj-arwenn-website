@@ -181,11 +181,11 @@
   el('backup').addEventListener('click',()=>run(async()=>{
     const data=await call('export');
     if(data.format!=='dj-arwenn-booked-dates-v1'||!Array.isArray(data.dates)||
-       data.count!==data.dates.length||data.dates.some(d=>typeof d!=='string'||!/^\\d{4}-\\d{2}-\\d{2}$/.test(d))) {
+       data.count!==data.dates.length||data.dates.some(d=>typeof d!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(d))) {
       throw new Error('Varnostna kopija ni bila potrjena. Datoteka ni shranjena.');
     }
     const filename='dj-arwenn-termini-'+new Date().toISOString().slice(0,10)+'.json';
-    const blob=new Blob([JSON.stringify(data,null,2)+'\\n'],{type:'application/json'});
+    const blob=new Blob([JSON.stringify(data,null,2)+'\n'],{type:'application/json'});
     const url=URL.createObjectURL(blob);
     try {
       const a=document.createElement('a');
