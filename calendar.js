@@ -102,14 +102,14 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!panel.hidden){clos
 document.addEventListener('arwenn:languagechanged',()=>{updateLabel();render();});
 document.addEventListener('arwenn:booking-reset',()=>{input.value='';updateLabel();render();});
 document.documentElement.classList.add('calendar-enhanced');
-toggle.hidden=false;input.tabIndex=-1;
+toggle.hidden=false;input.tabIndex=-1;input.required=false;
 updateLabel();render();refresh();
 window.DJArwennCalendar={
   async validate(){
     if(!input.value){hint(tr('Izberi datum dogodka.','Please choose an event date.'),'error');toggle.focus();return false;}
     if(new Date(input.value+'T12:00:00')<today){hint(tr('Datum ne more biti v preteklosti.','The date cannot be in the past.'),'error');toggle.focus();return false;}
     await refresh();
-    if(booked.has(input.value)){hint(tr('Ta datum je zaseden. Izberi drugega.','This date is booked. Choose another.'),'error');toggle.focus();return false;}
+    if(!input.value||booked.has(input.value)){hint(tr('Ta datum je zaseden ali ni več izbran. Izberi drugega.','This date is booked or no longer selected. Choose another.'),'error');toggle.focus();return false;}
     return true;
   },
   refresh,render
