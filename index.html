@@ -57,7 +57,7 @@
           <p class="hero-lead" data-t="heroLead">Od prvega komada do zadnjega refrena. Glasba, ki poveže generacije in spravi družbo na plesišče.</p>
           <p class="service-area" data-t="heroArea"><span aria-hidden="true">⌖</span> OBMOČJE NASTOPOV: OD PREKMURJA DO CELJA</p>
           <div class="hero-buttons">
-            <a class="btn btn-primary" href="https://m.me/DJArwenn" target="_blank" rel="noopener noreferrer"><span data-t="heroCta">PREVERI PROST TERMIN</span><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+            <a class="btn btn-primary" href="#preveri-termin"><span data-t="heroCta">PREVERI PROST TERMIN</span><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
             <a class="btn btn-text" href="#kontakt"><span data-t="heroMore">POŠLJI POVPRAŠEVANJE</span><span aria-hidden="true"> ↓</span></a>
           </div>
           <div class="hero-meta"><span>01 <b data-t="metaOne">POROKE</b></span><i></i><span>02 <b data-t="metaTwo">ZABAVE</b></span><i></i><span>03 <b data-t="metaThree">DOGODKI</b></span></div>
@@ -119,6 +119,18 @@
 
     <section class="section contact" id="kontakt" aria-labelledby="contact-title"><div class="contact-glow" aria-hidden="true"></div><div class="container contact-layout"><div class="contact-copy reveal"><div class="section-kicker"><span>05 / </span><span data-t="contactKicker">REZERVACIJE IN POVPRAŠEVANJA</span></div><h2 id="contact-title" data-t="contactTitle">IMAŠ DATUM?<br /><em>JAZ IMAM BEAT.</em></h2><p data-t="contactLead">Povej mi, kakšno zabavo pripravljaš. Preveriva termin in skupaj začrtava pravi glasbeni večer.</p><a class="btn btn-primary contact-direct" href="https://m.me/DJArwenn" target="_blank" rel="noopener noreferrer"><span data-t="directMessenger">PIŠI MI NA MESSENGER</span><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><p class="contact-note" data-t="contactNote">Najhitreje me dosežeš prek Facebook Messengerja.</p></div>
       <div class="inquiry-card reveal">
+ <section class="availability-check" id="preveri-termin" aria-labelledby="availability-title">
+  <div class="availability-kicker" data-t="availabilityKicker">HITRO PREVERJANJE</div>
+  <h3 id="availability-title" data-t="availabilityTitle">KDAJ NAČRTUJEŠ ZABAVO?</h3>
+  <p data-t="availabilityInfo">Preveri samo izbrani datum. Tvoj termin bom dokončno potrdil osebno.</p>
+  <div class="availability-controls">
+   <label class="sr-only" for="availability-date" data-t="availabilityDateLabel">Datum dogodka</label>
+   <input id="availability-date" type="date" required aria-label="Datum dogodka" />
+   <button type="button" id="availability-button" data-t="availabilityAction">PREVERI TERMIN</button>
+  </div>
+  <p id="availability-result" class="availability-result" role="status" aria-live="polite" hidden></p>
+  <a id="availability-continue" class="availability-continue" href="#inquiry-form" data-t="availabilityContinue" hidden>POŠLJI POVPRAŠEVANJE →</a>
+ </section>
  <div class="inquiry-head"><div><div class="inquiry-label">BOOKING REQUEST / DJ ARWENN</div><h3 data-t="formTitle">POŠLJI POVPRAŠEVANJE</h3></div><span class="inquiry-icon" aria-hidden="true">↗</span></div>
  <p class="form-help" data-t="formHelp">Izpolni obrazec. Povpraševanje bom prejel po e-pošti in ti lahko odgovoril neposredno.</p>
  <form id="inquiry-form" action="https://api.web3forms.com/submit" method="POST" accept-charset="UTF-8">
@@ -152,7 +164,7 @@
 </div>
       </div></section>
   </main>
-  <a class="mobile-book" href="https://m.me/DJArwenn" target="_blank" rel="noopener noreferrer"><span data-t="mobileBook">PREVERI PROST TERMIN</span><span aria-hidden="true">↗</span></a>
+  <a class="mobile-book" href="#preveri-termin"><span data-t="mobileBook">PREVERI PROST TERMIN</span><span aria-hidden="true">↗</span></a>
   <footer class="footer"><div class="container">
  <div class="footer-top"><a class="brand brand-footer" href="#top" aria-label="DJ Arwenn – nazaj na vrh"><img class="brand-logo-img" src="assets/dj-arwenn-logo-transparent.png" alt="DJ Arwenn" width="980" height="390" decoding="async" /></a><span class="footer-tag" data-t="footerTag">TVOJ VEČER. TVOJ RITEM.</span><a class="back-top" href="#top" aria-label="Nazaj na vrh">↑</a></div>
  <div class="footer-social"><h3 data-t="footerSocialTitle">POVEŽIMO SE</h3><nav class="social-links" aria-label="Družabna omrežja in kontakt"><a href="https://m.me/DJArwenn" target="_blank" rel="noopener noreferrer" aria-label="Messenger" ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a9 9 0 0 1-9.1 8.4 10 10 0 0 1-3.4-.6L4 21l1.3-4.2A8.6 8.6 0 0 1 3 11.5C3 6.8 7 3 12 3s9 3.8 9 8.5Z"/><path d="m7 14 4-4 3 3 3-4-4 2.5-3-3L7 14Z" stroke="none" fill="currentColor"/></svg><span>MESSENGER</span></a>
@@ -163,6 +175,7 @@
 <a href="mailto:sasolju999@gmail.com"  aria-label="Pošlji e-pošto" ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="m3 7 9 7 9-7"/></svg><span>E-POŠTA</span></a></nav></div>
  <div class="footer-bottom"><span>© <span id="year">2026</span> DJ ARWENN</span><span data-t="footerPrivacy">Brez analitičnih piškotkov · Kontaktni obrazec uporablja zunanjo storitev.</span><a class="privacy-footer-link" href="zasebnost.html" data-t="privacyLink">ZASEBNOST</a></div>
 </div></footer>
+  <script defer src="availability.js"></script>
   <script defer src="app.js"></script>
 </body>
 </html>
