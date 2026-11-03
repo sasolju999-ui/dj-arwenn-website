@@ -195,6 +195,28 @@ async function managePrivateDates(request, env) {
     end.setUTCFullYear(end.getUTCFullYear() + 2);
     const last = end.toISOString().slice(0, 10);
 
+    if (payload.action === "export") {
+      // A private, read-only snapshot of the date-only booking table.
+      // Include historical dates so a downloaded backup is complete.
+      // Fail closed rather than silently exporting a truncated list.
+      const records = await env.DB.prepare(
+        "SELECT date FROM booked_dates ORDER BY date LIMIT 5001"
+      ).all();
+      if (!records.success || !Array.isArray(records.results)) {
+        throw new Error("D1 export unavailable");
+      }
+      if (records.results.length > 5000) {
+        return reply({ error: "export_too_large" }, 413);
+      }
+      return reply({
+        status: "ok",
+        format: "dj-arwenn-booked-dates-v1",
+        exportedAt: new Date().toISOString(),
+        dates: records.results.map(row => row.date),
+        count: records.results.length
+      });
+    }
+
     if (payload.action === "list") {
       const records = await env.DB.prepare(
         "SELECT date FROM booked_dates WHERE date >= ? AND date <= ? ORDER BY date LIMIT 800"
