@@ -1,2 +1,3 @@
 User-agent: *
 Allow: /
+Sitemap: https://dj-arwenn-website.sasolju999.workers.dev/sitemap.xml
