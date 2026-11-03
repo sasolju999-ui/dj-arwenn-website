@@ -8,5 +8,12 @@
     "run_worker_first": [
       "/api/*"
     ]
-  }
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "dj-arwenn-bookings",
+      "database_id": "3c39c3fd-8e7d-4691-a52b-e1518433ec66"
+    }
+  ]
 }
