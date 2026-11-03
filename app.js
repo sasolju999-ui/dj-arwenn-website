@@ -13,6 +13,7 @@
       faq4Q:'Kako preverim prost termin?',faq4A:'Piši na Messenger ali pošlji povpraševanje z datumom in krajem dogodka. Odgovorim po preverjanju termina.',
       privacyLink:'ZASEBNOST',formOpenMail:'ODPRI E-POŠTO',formOpenMessenger:'MESSENGER',
       formRecover:'Oddaja ni bila potrjena. Podatki ostanejo v obrazcu; pošlji povpraševanje prek e-pošte ali Messengerja.',
+      turnstileIntro:'HITRO VARNOSTNO PREVERJANJE',turnstileWait:'Varnostno preverjanje se še nalaga. Poskusi znova ali uporabi Messenger.',formSlowDown:'Preveč povpraševanj v kratkem času. Poskusi pozneje ali mi piši na Messenger.',formUnavailable:'Pošiljanje trenutno ni na voljo. Poskusi znova ali mi piši prek Messengerja.',
       captchaIntro:'ZAŠČITA PRED NEŽELENO POŠTO · Potrdi, da nisi robot.',captchaRequired:'Pred pošiljanjem prosim potrdi preverjanje »Nisem robot«.',captchaUnavailable:'Varnostnega preverjanja ni mogoče naložiti. Poskusi osvežiti stran ali mi piši prek Messengerja.',captchaRetry:'Povpraševanje ni bilo poslano. Po potrebi ponovno opravi preverjanje »Nisem robot« in poskusi znova.',formSending:'POŠILJANJE ...',formSuccess:'Povpraševanje je Web3Forms sprejel. Za dokončno potrditev preveri še, ali je sporočilo prispelo v nabiralnik.',
       formFailure:'Zunanja storitev se ni odzvala ali oddaje ni potrdila. Povpraševanja zato ne moremo šteti kot poslanega.',
       formServiceNote:'Podatki se pošljejo prek zunanjega ponudnika Web3Forms. Če ta ni dosegljiv, bo na voljo druga možnost stika.',
@@ -41,6 +42,7 @@
       faq4Q:'How can I check availability?',faq4A:'Send a Messenger message or a booking enquiry with the event date and location. I will reply after checking availability.',
       privacyLink:'PRIVACY',formOpenMail:'OPEN EMAIL APP',formOpenMessenger:'MESSENGER',
       formRecover:'Submission could not be confirmed. Your details are still in the form. Please email your enquiry or use Messenger.',
+      turnstileIntro:'QUICK SECURITY CHECK',turnstileWait:'Security verification is still loading. Please retry or use Messenger.',formSlowDown:'Too many enquiries. Please retry later or message me on Messenger.',formUnavailable:'Sending is currently unavailable. Please retry or contact me on Messenger.',
       captchaIntro:'SPAM PROTECTION · Please confirm you are not a robot.',captchaRequired:'Please complete the “I am human” check before sending.',captchaUnavailable:'The security check could not load. Please refresh the page or contact me via Messenger.',captchaRetry:'Your request was not sent. Please complete the captcha again if needed and retry.',formSending:'SENDING ...',formSuccess:'Web3Forms accepted your enquiry. I will confirm availability after receiving the email.',
       formFailure:'The external service was unavailable or did not confirm submission. We cannot mark your message as sent.',
       formServiceNote:'Your details are handled by the external provider Web3Forms. If it is unavailable, an alternative contact option will appear.',
@@ -95,6 +97,50 @@
     const submitButton = bookingForm.querySelector('button[type="submit"]');
     const submitText = submitButton.querySelector('[data-t="formGenerate"]');
     const captchaBox = bookingForm.querySelector('.h-captcha');
+    const captchaPanel = bookingForm.querySelector('.inquiry-captcha');
+    const captchaLabel = captchaPanel?.querySelector('.inquiry-captcha-label');
+    let captchaMode = 'hcaptcha';
+    let turnstileWidget = null;
+    let turnstileToken = '';
+    let turnstileReady = false;
+    // Preserve hCaptcha until a fully configured Worker explicitly enables Turnstile.
+    async function configureEnquiryCaptcha() {
+      try {
+        const response = await fetch('/api/enquiry/config', { cache:'no-store' });
+        if (!response.ok) return;
+        const config = await response.json();
+        if (config.mode !== 'turnstile' || typeof config.sitekey !== 'string') return;
+        const script = document.createElement('script');
+        script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+        script.async = true;
+        script.onload = () => {
+          if (!window.turnstile) return;
+          try {
+            const container = document.createElement('div');
+            container.className = 'turnstile-widget';
+            captchaPanel.appendChild(container);
+            turnstileWidget = window.turnstile.render(container, {
+              sitekey: config.sitekey,
+              action: 'dj_enquiry',
+              appearance: 'always',
+              callback: token => { turnstileToken = token; },
+              'expired-callback': () => { turnstileToken = ''; },
+              'error-callback': () => { turnstileToken = ''; }
+            });
+            captchaMode = 'turnstile';
+            turnstileReady = true;
+            captchaBox.hidden = true;
+            if (captchaLabel) captchaLabel.textContent = strings[lang].turnstileIntro;
+          } catch (_) { /* Keep existing Web3Forms hCaptcha. */ }
+        };
+        script.onerror = () => { /* Existing hCaptcha stays available. */ };
+        document.head.appendChild(script);
+      } catch (_) { /* Existing hCaptcha stays available. */ }
+    }
+    configureEnquiryCaptcha();
+    document.addEventListener('arwenn:languagechanged', () => {
+      if (captchaMode === 'turnstile' && captchaLabel) captchaLabel.textContent = strings[lang].turnstileIntro;
+    });
     let lastSuccessAt = 0;
     const showFormIssue = (text) => {
       status.hidden = false;
@@ -125,12 +171,16 @@
     bookingForm.addEventListener('submit', async (event) => {
       event.preventDefault();
       if (submitButton.disabled || !bookingForm.reportValidity()) return;
-      // Web3Forms hCaptcha must be verified by its backend; this only gives clear UX.
-      const captchaToken = bookingForm.querySelector('[name="h-captcha-response"]')?.value?.trim();
+      // Both systems enforce their challenge server-side (Web3Forms or the Worker).
+      const captchaToken = captchaMode === 'turnstile'
+        ? (turnstileReady ? turnstileToken : '')
+        : bookingForm.querySelector('[name="h-captcha-response"]')?.value?.trim();
       if (!captchaToken) {
-        const captchaLoaded = Boolean(captchaBox?.querySelector('iframe'));
-        showFormIssue(captchaLoaded ? strings[lang].captchaRequired : strings[lang].captchaUnavailable);
-        captchaBox?.scrollIntoView({ behavior:'smooth', block:'center' });
+        const captchaLoaded = captchaMode === 'turnstile' ? turnstileReady : Boolean(captchaBox?.querySelector('iframe'));
+        showFormIssue(captchaMode === 'turnstile'
+          ? strings[lang].turnstileWait
+          : captchaLoaded ? strings[lang].captchaRequired : strings[lang].captchaUnavailable);
+        captchaPanel?.scrollIntoView({ behavior:'smooth', block:'center' });
         return;
       }
       // Small accidental-double-submit guard in this tab; not a server-side spam limit.
@@ -160,24 +210,47 @@
       status.textContent = strings[lang].formSending;
       if (submitText) submitText.textContent = strings[lang].formSending;
       try {
-        const response = await fetch('https://api.web3forms.com/submit', {
-          method:'POST', body:JSON.stringify(Object.fromEntries(formData.entries())), headers:{'Content-Type':'application/json',Accept:'application/json'}, signal:controller.signal
+        const usingTurnstile = captchaMode === 'turnstile';
+        const payload = usingTurnstile ? {
+          name: fieldValue('client-name'),
+          email: fieldValue('client-email'),
+          phone: fieldValue('client-phone'),
+          eventType: fieldValue('event-type'),
+          eventDate: fieldValue('event-date'),
+          location: fieldValue('event-location'),
+          notes: fieldValue('event-notes'),
+          consent: Boolean(bookingForm.querySelector('.inquiry-consent input[type="checkbox"]')?.checked),
+          turnstileToken: captchaToken,
+          botcheck: Boolean(formData.get('botcheck'))
+        } : Object.fromEntries(formData.entries());
+        const response = await fetch(usingTurnstile ? '/api/enquiry' : 'https://api.web3forms.com/submit', {
+          method:'POST', body:JSON.stringify(payload), headers:{'Content-Type':'application/json',Accept:'application/json'}, signal:controller.signal, cache:'no-store'
         });
-        if (!response.ok) throw new Error('Web3Forms HTTP ' + response.status);
-        const result = await response.json();
-        if (!(result && (result.success === true || result.success === 'true'))) {
-          throw new Error('Web3Forms submission was not confirmed');
+        const result = await response.json().catch(() => null);
+        if (!response.ok || !(result && (result.success === true || result.success === 'true'))) {
+          if (usingTurnstile && result?.error === 'booked') throw new Error('booked');
+          if (usingTurnstile && response.status === 429) throw new Error('rate_limited');
+          throw new Error('delivery_failed');
         }
         status.dataset.state = 'success';
         status.textContent = strings[lang].formSuccess;
         lastSuccessAt = Date.now();
         bookingForm.reset();
-        if (window.hcaptcha && captchaBox) {
+        if (captchaMode === 'turnstile') {
+          turnstileToken = '';
+          try { if (window.turnstile && turnstileWidget !== null) window.turnstile.reset(turnstileWidget); } catch (_) {}
+        } else if (window.hcaptcha && captchaBox) {
           try { window.hcaptcha.reset(); } catch (_) { /* Widget may already be unmounted. */ }
         }
       } catch (_error) {
-        showFormIssue(strings[lang].formFailure);
-        if (window.hcaptcha && captchaBox) {
+        const issue = _error?.message === 'booked' ? strings[lang].formBooked
+          : _error?.message === 'rate_limited' ? strings[lang].formSlowDown
+          : strings[lang].formFailure;
+        showFormIssue(issue);
+        if (captchaMode === 'turnstile') {
+          turnstileToken = '';
+          try { if (window.turnstile && turnstileWidget !== null) window.turnstile.reset(turnstileWidget); } catch (_) {}
+        } else if (window.hcaptcha && captchaBox) {
           try { window.hcaptcha.reset(); } catch (_) { /* Allow manual retry. */ }
         }
       } finally {
