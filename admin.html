@@ -82,6 +82,12 @@
       <div class="row"><button id="book" type="button">OZNAČI KOT ZASEDENO</button><button id="release" class="secondary" type="button">SPROSTI DATUM</button></div>
     </section>
     <section class="card">
+      <div class="row"><h2>Varnostna kopija</h2></div>
+      <p class="muted">Prenesi zasebno kopijo vseh zasedenih datumov, tudi preteklih. Datoteka ne vsebuje osebnih podatkov ali skrbniškega ključa. Shrani jo na varno mesto.</p>
+      <button id="backup" class="secondary" type="button">PRENESI VARNOSTNO KOPIJO</button>
+      <p class="hint">Izvoz ne spreminja rezervacij. Datoteka JSON je namenjena varnemu hranjenju, ne javni objavi.</p>
+    </section>
+    <section class="card">
       <div class="row"><h2>Zasedeni prihodnji termini</h2><button id="refresh" class="secondary" type="button">OSVEŽI</button></div>
       <p id="empty" class="muted" hidden>Trenutno ni vpisanih prihodnjih zasedenih datumov.</p>
       <ul id="dates" class="dates"></ul>
@@ -127,7 +133,7 @@
   }
   function setBusy(value){
     busy=value;
-    ['sign-in','book','release','refresh'].forEach(id=>el(id).disabled=value);
+    ['sign-in','book','release','refresh','backup'].forEach(id=>el(id).disabled=value);
   }
   async function refresh(){
     const data=await call('list');
@@ -153,6 +159,7 @@
   async function change(action, date){
     if(!date||date<earliest||date>latest){notice('Izberi veljaven datum.');return}
     if(action==='release'&&!confirm('Res želiš sprostiti '+fmt(date)+'?'))return;
+    if(action==='book'&&!confirm('Označim '+fmt(date)+' kot ZASEDENO? To blokira nova povpraševanja za ta datum.'))return;
     await run(async()=>{
       await call(action,date);
       await refresh();
@@ -171,6 +178,24 @@
     });
   });
   el('sign-out').addEventListener('click',lock);
+  el('backup').addEventListener('click',()=>run(async()=>{
+    const data=await call('export');
+    if(data.format!=='dj-arwenn-booked-dates-v1'||!Array.isArray(data.dates)||
+       data.count!==data.dates.length||data.dates.some(d=>typeof d!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(d))) {
+      throw new Error('Varnostna kopija ni bila potrjena. Datoteka ni shranjena.');
+    }
+    const filename='dj-arwenn-termini-'+new Date().toISOString().slice(0,10)+'.json';
+    const blob=new Blob([JSON.stringify(data,null,2)+'\n'],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    try {
+      const a=document.createElement('a');
+      a.href=url;a.download=filename;a.rel='noopener';
+      document.body.appendChild(a);a.click();a.remove();
+      notice('Pripravljen je prenos varnostne kopije ('+data.count+' datumov). Preveri mapo Prenosi in datoteko shrani varno.',true);
+    }finally{
+      setTimeout(()=>URL.revokeObjectURL(url),30000);
+    }
+  }));
   el('refresh').addEventListener('click',()=>run(async()=>{await refresh();notice('Seznam je osvežen.',true)}));
   el('book').addEventListener('click',()=>change('book',dateField.value));
   el('release').addEventListener('click',()=>change('release',dateField.value));

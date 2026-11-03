@@ -195,6 +195,28 @@ async function managePrivateDates(request, env) {
     end.setUTCFullYear(end.getUTCFullYear() + 2);
     const last = end.toISOString().slice(0, 10);
 
+    if (payload.action === "export") {
+      // A private, read-only snapshot of the date-only booking table.
+      // Include historical dates so a downloaded backup is complete.
+      // Fail closed rather than silently exporting a truncated list.
+      const records = await env.DB.prepare(
+        "SELECT date FROM booked_dates ORDER BY date LIMIT 5001"
+      ).all();
+      if (!records.success || !Array.isArray(records.results)) {
+        throw new Error("D1 export unavailable");
+      }
+      if (records.results.length > 5000) {
+        return reply({ error: "export_too_large" }, 413);
+      }
+      return reply({
+        status: "ok",
+        format: "dj-arwenn-booked-dates-v1",
+        exportedAt: new Date().toISOString(),
+        dates: records.results.map(row => row.date),
+        count: records.results.length
+      });
+    }
+
     if (payload.action === "list") {
       const records = await env.DB.prepare(
         "SELECT date FROM booked_dates WHERE date >= ? AND date <= ? ORDER BY date LIMIT 800"
@@ -227,6 +249,18 @@ export default {
     if (path === "/api/availability") return checkAvailability(request, env);
     if (path === "/api/admin/dates") return managePrivateDates(request, env);
     if (path.startsWith("/api/")) return reply({ status: "unknown" }, 404);
+    if (path === "/admin.html" || path === "/admin") {
+      const assetResponse = await env.ASSETS.fetch(request);
+      const headers = new Headers(assetResponse.headers);
+      headers.set("Cache-Control", "private, no-store, max-age=0");
+      headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
+      headers.set("X-Frame-Options", "DENY");
+      headers.set("X-Content-Type-Options", "nosniff");
+      headers.set("Referrer-Policy", "no-referrer");
+      headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+      headers.set("Content-Security-Policy", "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'");
+      return new Response(assetResponse.body, { status: assetResponse.status, statusText: assetResponse.statusText, headers });
+    }
     return env.ASSETS.fetch(request);
   },
 };
