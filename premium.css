@@ -608,3 +608,26 @@ h1 em,h2 em,.section h2 em,.contact h2 em{color:#f04761;font-style:normal}
   .inquiry-card{padding-inline:15px}
   .inquiry-card .availability-check{padding-inline:13px}
 }
+
+/* Web3Forms hCaptcha: readable, mobile-friendly and accessible. */
+.inquiry-card .inquiry-captcha{
+  background:#fff;
+  border:1px solid #ddd3d7;
+  border-radius:9px;
+  padding:14px 12px 12px;
+  margin:15px 0;
+  overflow:hidden;
+}
+.inquiry-card .inquiry-captcha-label{
+  color:#29262a;
+  font:750 12px/1.5 Inter,"Segoe UI",Arial,sans-serif;
+  margin:0 0 12px;
+}
+.inquiry-card .inquiry-captcha .h-captcha{
+  display:block;
+  max-width:100%;
+  min-height:74px;
+}
+@media(max-width:390px){
+  .inquiry-card .inquiry-captcha{padding:12px 8px}
+}
