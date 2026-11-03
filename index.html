@@ -121,11 +121,11 @@
       <div class="inquiry-card reveal">
  <div class="inquiry-head"><div><div class="inquiry-label">BOOKING REQUEST / DJ ARWENN</div><h3 data-t="formTitle">POŠLJI POVPRAŠEVANJE</h3></div><span class="inquiry-icon" aria-hidden="true">↗</span></div>
  <p class="form-help" data-t="formHelp">Izpolni obrazec. Povpraševanje bom prejel po e-pošti in ti lahko odgovoril neposredno.</p>
- <form id="inquiry-form" action="https://formsubmit.co/sasolju999@gmail.com" method="POST" accept-charset="UTF-8">
- <input type="hidden" name="_subject" value="DJ Arwenn | Novo povpraševanje za nastop">
- <input type="hidden" name="_template" value="table">
- <input type="hidden" name="_captcha" value="true">
- <input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off" aria-hidden="true">
+ <form id="inquiry-form" action="https://api.web3forms.com/submit" method="POST" accept-charset="UTF-8">
+ <input type="hidden" name="access_key" value="2c40a6ea-1281-426c-9c9c-c8111dbe4a68">
+ <input type="hidden" name="subject" value="DJ Arwenn | Novo povpraševanje za nastop">
+ <input type="hidden" name="from_name" value="DJ Arwenn – Spletna rezervacija">
+ <input type="checkbox" name="botcheck" style="display:none" tabindex="-1" autocomplete="off" aria-hidden="true">
  <div class="field-row">
   <div class="field"><label for="client-name" data-t="fieldName">IME IN PRIIMEK</label><input id="client-name" name="Ime in priimek" type="text" maxlength="100" autocomplete="name" required placeholder="Ime in priimek" data-t-placeholder="namePlaceholder" /></div>
   <div class="field"><label for="client-email" data-t="fieldEmail">E-POŠTA</label><input id="client-email" name="email" type="email" maxlength="150" autocomplete="email" required placeholder="ime@primer.si" data-t-placeholder="emailPlaceholder" /></div>
@@ -133,13 +133,23 @@
  <div class="field"><label for="client-phone" data-t="fieldPhone">TELEFON (NEOBVEZNO)</label><input id="client-phone" name="Telefon" type="tel" maxlength="40" autocomplete="tel" placeholder="+386 ..." data-t-placeholder="phonePlaceholder" /></div>
  <div class="field"><label for="event-type" data-t="fieldType">VRSTA DOGODKA</label><select id="event-type" name="Vrsta dogodka"><option value="Rojstni dan / zasebna zabava" data-t="typeParty">Rojstni dan / zasebna zabava</option><option value="Poroka" data-t="typeWedding">Poroka</option><option value="Poslovni dogodek" data-t="typeBusiness">Poslovni dogodek</option><option value="Klub / javna prireditev" data-t="typeClub">Klub / javna prireditev</option><option value="Drugo" data-t="typeOther">Drugo</option></select></div>
  <div class="field-row">
-  <div class="field"><label for="event-date" data-t="fieldDate">DATUM</label><input id="event-date" name="Datum dogodka" type="date" required /></div>
+  <div class="field calendar-field"><label for="event-date" data-t="fieldDate">DATUM</label>
+  <input id="event-date" name="Datum dogodka" type="date" required />
+  <button class="calendar-trigger" id="calendar-trigger" type="button" aria-expanded="false" aria-controls="booking-calendar" hidden>Izberi datum dogodka <span aria-hidden="true">▦</span></button>
+  <div class="booking-calendar" id="booking-calendar" role="group" aria-label="Izbira datuma dogodka" hidden>
+   <div class="calendar-head"><button type="button" id="calendar-prev" aria-label="Prejšnji mesec">‹</button><strong id="calendar-month"></strong><button type="button" id="calendar-next" aria-label="Naslednji mesec">›</button></div>
+   <div class="calendar-weekdays" id="calendar-weekdays" aria-hidden="true"></div>
+   <div class="calendar-days" id="calendar-days"></div>
+   <p class="calendar-legend"><span aria-hidden="true">●</span> <span data-t="calendarLegend">Zasedeni datumi so označeni sivo.</span></p>
+  </div>
+  <p id="availability-note" class="availability-note" aria-live="polite" hidden></p>
+ </div>
   <div class="field"><label for="event-location" data-t="fieldLocation">KRAJ DOGODKA</label><input id="event-location" name="Kraj dogodka" type="text" maxlength="80" placeholder="npr. Ptuj" data-t-placeholder="locationPlaceholder" required /></div>
  </div>
  <div class="field"><label for="event-notes" data-t="fieldNotes">DODATNE INFORMACIJE (NEOBVEZNO)</label><textarea id="event-notes" name="Sporočilo" rows="4" maxlength="1500" placeholder="Okvirno število gostov, glasbene želje ..." data-t-placeholder="notesPlaceholder"></textarea></div>
- <label class="inquiry-consent"><input type="checkbox" name="Strinjam se z obdelavo podatkov za odgovor" value="Da" required /><span data-t="formPrivacy">Razumem, da bodo moji podatki uporabljeni za odgovor na povpraševanje in posredovani prek storitve FormSubmit. Preberem lahko <a href="zasebnost.html" target="_blank" rel="noopener noreferrer">obvestilo o zasebnosti</a>.</span></label>
+ <label class="inquiry-consent"><input type="checkbox" name="Strinjam se z obdelavo podatkov za odgovor" value="Da" required /><span data-t="formPrivacy">Razumem, da bodo moji podatki uporabljeni za odgovor na povpraševanje in posredovani prek storitve Web3Forms. Preberem lahko <a href="zasebnost.html" target="_blank" rel="noopener noreferrer">obvestilo o zasebnosti</a>.</span></label>
  <button type="submit" class="btn btn-primary form-submit"><span data-t="formGenerate">POŠLJI POVPRAŠEVANJE</span><span aria-hidden="true">→</span></button>
- <p class="form-help form-service-note" data-t="formServiceNote">Podatki se pošljejo prek zunanjega ponudnika FormSubmit. Če ta ni dosegljiv, bo na voljo druga možnost stika.</p>
+ <p class="form-help form-service-note" data-t="formServiceNote">Obrazec uporablja Web3Forms. Če pošiljanje ni na voljo, lahko izbereš e-pošto ali Messenger.</p>
  <div class="form-status" id="form-status" role="status" aria-live="polite" hidden></div>
  <div class="form-recovery" id="form-recovery" hidden>
   <p data-t="formRecover">Pošiljanje ni uspelo. Podatki ostanejo izpolnjeni; pošlji povpraševanje prek e-pošte ali Messengerja.</p>
@@ -160,6 +170,7 @@
 <a href="mailto:sasolju999@gmail.com"  aria-label="Pošlji e-pošto" ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="m3 7 9 7 9-7"/></svg><span>E-POŠTA</span></a></nav></div>
  <div class="footer-bottom"><span>© <span id="year">2026</span> DJ ARWENN</span><span data-t="footerPrivacy">Brez analitičnih piškotkov · Kontaktni obrazec uporablja zunanjo storitev.</span><a class="privacy-footer-link" href="zasebnost.html" data-t="privacyLink">ZASEBNOST</a></div>
 </div></footer>
+  <script defer src="calendar.js"></script>
   <script defer src="app.js"></script>
 </body>
 </html>
