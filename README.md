@@ -99,3 +99,38 @@ The contact form now includes free Web3Forms hCaptcha, in addition to its existi
 Web3Forms docs: https://docs.web3forms.com/getting-started/customizations/spam-protection/hcaptcha
 
 Caveats: hCaptcha introduces some friction, and browsers that block third-party scripts might be unable to send via the Web3Forms form. A direct mailto or Messenger alternative remains available. The 45-second same-tab repeated-submission guard is client-side only; it is **not** an abuse or backend rate limit. Never expose the private Worker secrets.
+
+## Optional no-subscription Turnstile + Gmail replacement (not enabled by default)
+
+The current Web3Forms + hCaptcha flow remains active until **all** Cloudflare settings are configured and `ENQUIRY_TURNSTILE_ENABLED=true`. The old flow is not deleted. This branch adds a second transport:
+
+1. Browser loads a Cloudflare Turnstile widget using the public `TURNSTILE_SITE_KEY`, with action `dj_enquiry`.
+2. Browser sends enquiry and Turnstile response to same-origin `POST /api/enquiry` on our Cloudflare Worker.
+3. Worker validates fields, checks D1 booked dates, applies IP-digest limits (5/hour and 12/day), and verifies Turnstile **server-side** using Cloudflare `siteverify` and `TURNSTILE_SECRET_KEY`. Never trust frontend checks alone.
+4. Worker forwards only validated fields and a server-only bridge token to a Google Apps Script web app.
+5. Google Apps Script uses `MailApp` to send the message to the Google account that deployed it (the owner), setting reply-to to the visitor.
+
+**Setup. Do not switch on until the last test passes:**
+
+1. In Cloudflare Turnstile, create a **Managed** widget. Allow the production hostname `dj-arwenn-website.sasolju999.workers.dev` (and your own domain if added later). Copy the **site key** and **secret key** separately. The site key is public; secret key must remain private.
+2. In `https://script.google.com/`, create a standalone Apps Script project and paste `integrations/apps-script-gmail.gs` into `Code.gs`. The file is an example, not deployed automatically.
+3. Generate a strong random shared secret (at least 32 characters) **locally**, save it in the Apps Script project's **Project Settings > Script properties** as `ENQUIRY_BRIDGE_TOKEN`. This is a **new independent secret**; do not reuse the admin key or the availability salt. Never send secret values in chat.
+4. Deploy the script as a **Web app** with **Execute as: Me** and **Who has access: Anyone**. Authorize its required permissions to send mail. Copy its `https://script.google.com/macros/s/.../exec` deployment URL. The script's shared secret is still required for every delivery; its URL alone must never send email.
+5. In Cloudflare Worker Settings > Variables and Secrets, configure:
+   - `TURNSTILE_SITE_KEY` = public site key (plain-text variable is sufficient).
+   - `TURNSTILE_SECRET_KEY` = private Turnstile secret (encrypted Secret).
+   - `ENQUIRY_APPS_SCRIPT_URL` = Apps Script deployment URL (variable or Secret).
+   - `ENQUIRY_BRIDGE_TOKEN` = same independent token as in Script Properties (encrypted Secret).
+   - **Leave `ENQUIRY_TURNSTILE_ENABLED` unset during configuration.**
+6. To test sending without impacting the live site, deploy or test the script separately (using a temporary private test harness with the shared token), ensure it sends to the intended owner Gmail account, and verify quotas and permissions. Then set `ENQUIRY_TURNSTILE_ENABLED=true` on the Worker to allow the new flow. Roll back by removing or setting the flag to `false`. This immediately restores the original hCaptcha/Web3Forms form after the next reload; **do not disable hCaptcha in Web3Forms dashboard while it is needed as the fallback**.
+7. After enabling, refresh the website and verify that Turnstile appears instead of hCaptcha. Submit one real test enquiry. Confirm that email arrives with the visitor's correct reply-to and all event fields, and that booked dates are still rejected. Test mobile Chrome. If delivery is not confirmed, disable the flag and retain the old form.
+
+**Reliability/security limitations:**
+
+- This integration is prepared but has not yet been tested with the user's live Turnstile or Apps Script account. Do not assume it is activated from a GitHub merge.
+- Google Apps Script may reject anonymous access if the account's administrator forbids "Anyone" deployments. MailApp has a **daily quota** and Google can change it.
+- Turnstile/Apps Script are third-party services and may introduce access or privacy implications; review the privacy notice before enabling.
+- If the Apps Script response is delayed, a message might arrive despite the browser reporting an unconfirmed send. Check your inbox before retrying.
+- No custom domain or paid Web3Forms upgrade is required for this implementation. However, it still depends on an account that allows public Apps Script web apps and sufficient free MailApp quota.
+- Users can still contact the DJ via Messenger or their email client if automated delivery fails. The Worker does not store enquiry personal details in D1, and the script does not log them.
+
