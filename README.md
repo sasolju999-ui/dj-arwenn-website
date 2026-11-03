@@ -51,6 +51,6 @@ A table row means "not accepting bookings for that date". Deleting that row reop
 - D1 schema: `migrations/0001_availability.sql` (safe to commit; no dates)
 - Asset filtering: `.assetsignore` keeps private Worker code and SQL out of public asset delivery.
 
-Existing deployment command: `npx wrangler deploy --assets .`. The Worker serves `/api/availability` for POST requests while static files remain available.
+**Cloudflare Git deployment command: `npx wrangler deploy` (do not use `--assets .`).** The Worker serves `/api/availability` for POST requests while static files remain available. After editing the Cloudflare deploy command, a new GitHub commit can trigger a new deployment if automatic builds are enabled.
 
 **Privacy limit:** Hiding the calendar and rate limiting greatly reduces casual snooping, but a determined person can still attempt repeated single-date queries. No public date-status checker can fully guarantee secrecy. Historical public GitHub commits may also contain previously published dates; Git history must be handled separately if those dates require full historical removal.
