@@ -38,6 +38,8 @@
     .dates li button{min-height:42px;font-size:12px}
     [hidden]{display:none!important}
     .top-link{display:inline-block;margin-top:14px;font-size:13px}
+    #generated-key{width:100%;min-height:84px;resize:none;font:600 13px/1.5 ui-monospace,Consolas,monospace;background:#f8f6f7;color:#19151a;border:1px solid #ac9da5;word-break:break-all;overflow-wrap:anywhere;margin:12px 0 0}
+    #copy-key{width:100%;margin-top:10px}
     @media(max-width:440px){.card{padding:16px}.dates li{gap:6px}.dates li button{padding:9px}.row>button{flex:1 1 100%}}
   </style>
 </head>
@@ -55,6 +57,12 @@
     <input id="token" type="password" autocomplete="off" spellcheck="false" placeholder="Prilepi svoj zasebni ključ">
     <p class="hint">Ključ ni isto kot AVAILABILITY_HASH_SALT. Na Cloudflare Workerju mora biti nastavljen kot skrivnost DJ_ARWENN_ADMIN_TOKEN (najmanj 32 znakov). Ključ ostane samo v pomnilniku te strani, ne v shrambi brskalnika.</p>
     <div class="row"><button id="sign-in" type="button">ODPRI TERMINE</button><button id="make-key" type="button" class="secondary">USTVARI NOV KLJUČ</button></div>
+    <div id="generated-tools" hidden>
+      <label for="generated-key">Nov ustvarjeni ključ (pritisni Kopiraj)</label>
+      <textarea id="generated-key" readonly rows="3" spellcheck="false" autocomplete="off" aria-label="Novi skrbniški ključ"></textarea>
+      <button id="copy-key" type="button">KOPIRAJ KLJUČ</button>
+      <p class="hint">Če gumb ne kopira: pridrži prst na ključu in izberi »Kopiraj«.</p>
+    </div>
     <p class="hint" id="generated-help" hidden>Nov ključ kopiraj in ga v Cloudflare nastavi kot skrivnost <strong>DJ_ARWENN_ADMIN_TOKEN</strong>. Ne pošiljaj ga nikomur in ga shrani v upravljalnik gesel. Po shranjevanju klikni »ODPRI TERMINE«.</p>
   </section>
   <section id="manager" hidden>
@@ -88,7 +96,9 @@
     message.hidden=false;message.dataset.type=ok?'ok':'error';message.textContent=text;
   }
   function lock(){
-    token='';tokenField.value='';manager.hidden=true;login.hidden=false;datesList.replaceChildren();
+    token='';tokenField.value='';tokenField.type='password';
+    el('generated-key').value='';el('generated-tools').hidden=true;el('generated-help').hidden=true;
+    manager.hidden=true;login.hidden=false;datesList.replaceChildren();
     notice('Upravljanje je zaklenjeno.');
   }
   async function call(action, date){
@@ -145,7 +155,7 @@
     token=tokenField.value.trim();
     if(token.length<32){notice('Vnesi skrbniški ključ z najmanj 32 znaki.');token='';return}
     await refresh();
-    tokenField.value='';
+    tokenField.value='';el('generated-key').value='';el('generated-tools').hidden=true;
     login.hidden=true;manager.hidden=false;
     notice('Dostop je uspešno potrjen.',true);
   }));
@@ -156,9 +166,30 @@
   el('make-key').addEventListener('click',()=>{
     const bytes=crypto.getRandomValues(new Uint8Array(48));
     const value=Array.from(bytes,x=>x.toString(16).padStart(2,'0')).join('');
-    tokenField.type='text';tokenField.value=value;el('generated-help').hidden=false;
-    tokenField.focus();tokenField.select();
-    notice('Ustvarjen je nov ključ. Kopiraj ga v Cloudflare in v upravljalnik gesel; tukaj še ni aktiviran.');
+    tokenField.type='password';tokenField.value=value;el('generated-help').hidden=false;
+    el('generated-key').value=value;el('generated-tools').hidden=false;
+    notice('Nov ključ je ustvarjen, ni pa še aktiviran. Pritisni KOPIRAJ KLJUČ in ga shrani v Cloudflare in upravljalnik gesel.');
+  });
+  el('copy-key').addEventListener('click',async()=>{
+    const field=el('generated-key');
+    if(!field.value)return;
+    let copied=false;
+    try {
+      if(navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(field.value);
+        copied=true;
+      }
+    }catch(_){/* Fallback for mobile browsers that deny Clipboard API. */}
+    if(!copied) {
+      field.focus();field.select();field.setSelectionRange(0,field.value.length);
+      try {copied=document.execCommand('copy')}catch(_){copied=false}
+    }
+    if(copied) {
+      notice('Ključ je kopiran! Prilepi ga v Cloudflare Secret DJ_ARWENN_ADMIN_TOKEN in ga varno shrani.',true);
+    }else {
+      field.focus();field.select();field.setSelectionRange(0,field.value.length);
+      notice('Brskalnik ni dovolil kopiranja. Ključ je označen: pridrži prst na njem in izberi »Kopiraj«.');
+    }
   });
   window.addEventListener('pagehide',()=>{token=''});
 })();
