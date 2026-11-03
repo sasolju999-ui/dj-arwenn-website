@@ -152,6 +152,10 @@
   <div class="field"><label for="event-location" data-t="fieldLocation">KRAJ DOGODKA</label><input id="event-location" name="Kraj dogodka" type="text" maxlength="80" placeholder="npr. Ptuj" data-t-placeholder="locationPlaceholder" required /></div>
  </div>
  <div class="field"><label for="event-notes" data-t="fieldNotes">DODATNE INFORMACIJE (NEOBVEZNO)</label><textarea id="event-notes" name="Sporočilo" rows="4" maxlength="1500" placeholder="Okvirno število gostov, glasbene želje ..." data-t-placeholder="notesPlaceholder"></textarea></div>
+ <div class="inquiry-captcha">
+  <p class="inquiry-captcha-label" data-t="captchaIntro">ZAŠČITA PRED NEŽELENO POŠTO · Potrdi, da nisi robot.</p>
+  <div class="h-captcha" data-captcha="true" data-theme="light" data-size="compact"></div>
+ </div>
  <label class="inquiry-consent"><input type="checkbox" name="Strinjam se z obdelavo podatkov za odgovor" value="Da" required /><span data-t="formPrivacy">Razumem, da bodo moji podatki uporabljeni za odgovor na povpraševanje in posredovani prek storitve Web3Forms. Preberem lahko <a href="zasebnost.html" target="_blank" rel="noopener noreferrer">obvestilo o zasebnosti</a>.</span></label>
  <button type="submit" class="btn btn-primary form-submit"><span data-t="formGenerate">POŠLJI POVPRAŠEVANJE</span><span aria-hidden="true">→</span></button>
  <p class="form-help form-service-note" data-t="formServiceNote">Obrazec uporablja Web3Forms. Če pošiljanje ni na voljo, lahko izbereš e-pošto ali Messenger.</p>
@@ -175,6 +179,8 @@
 <a href="mailto:sasolju999@gmail.com"  aria-label="Pošlji e-pošto" ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="m3 7 9 7 9-7"/></svg><span>E-POŠTA</span></a></nav></div>
  <div class="footer-bottom"><span>© <span id="year">2026</span> DJ ARWENN</span><span data-t="footerPrivacy">Brez analitičnih piškotkov · Kontaktni obrazec uporablja zunanjo storitev.</span><a class="privacy-footer-link" href="zasebnost.html" data-t="privacyLink">ZASEBNOST</a></div>
 </div></footer>
+  <!-- Web3Forms zero-config hCaptcha: dashboard must enable hCaptcha as spam protection. -->
+  <script src="https://web3forms.com/client/script.js" async defer></script>
   <script defer src="availability.js"></script>
   <script defer src="app.js"></script>
 </body>

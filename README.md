@@ -84,3 +84,18 @@ The admin form holds the token only in JS memory until the page closes or is loc
 - Public enquiries remain delivered through Web3Forms. Its existing botcheck honeypot and service-side protection are not an assurance against all spam; adding Turnstile would need a server-side verified submission proxy and careful testing.
 - **Functional verification:** use a date you know is free, mark it booked in owner UI, verify the public lookup displays **TERMIN JE ŽE ZASEDEN**, release the date, verify **TERMIN JE PREDVIDOMA PROST**. Do not perform this test on actual confirmed bookings.
 
+## Form spam protection (Web3Forms hCaptcha)
+
+The contact form now includes free Web3Forms hCaptcha, in addition to its existing honeypot. The browser prevents submission until hCaptcha has produced a response token, while Web3Forms verifies that token on its own servers. This does not require a new Cloudflare Worker secret, hCaptcha account, paid subscription, or changes to the private booking D1 system.
+
+**Required manual activation in the Web3Forms dashboard:**
+
+1. Visit https://app.web3forms.com/ and open the form associated with the existing DJ Arwenn booking enquiry access key.
+2. Find Spam Protection / Block Spam / CAPTCHA settings and choose **hCaptcha**, then save. Web3Forms documentation states that this is required to enforce hCaptcha server-side. Do not assume the UI alone enforces it.
+3. Check the live enquiry form in a normal and a private mobile browser. Verify the hCaptcha appears, solving it allows an enquiry, and a real test email arrives.
+4. Submit the form without solving the challenge and verify that no email is sent. Keep the fallback mailto and Messenger options usable if hCaptcha is blocked or the service is unavailable.
+5. If problems arise, revert the site change or restore the prior working form while troubleshooting.
+
+Web3Forms docs: https://docs.web3forms.com/getting-started/customizations/spam-protection/hcaptcha
+
+Caveats: hCaptcha introduces some friction, and browsers that block third-party scripts might be unable to send via the Web3Forms form. A direct mailto or Messenger alternative remains available. The 45-second same-tab repeated-submission guard is client-side only; it is **not** an abuse or backend rate limit. Never expose the private Worker secrets.
