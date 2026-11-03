@@ -243,10 +243,169 @@ async function managePrivateDates(request, env) {
   }
 }
 
+
+/**
+ * Optional Turnstile -> Gmail bridge. Disabled unless every setting is present
+ * and ENQUIRY_TURNSTILE_ENABLED is explicitly "true".
+ * The original Web3Forms/hCaptcha form stays available until activation.
+ */
+function enquiryBridgeReady(env) {
+  return env.ENQUIRY_TURNSTILE_ENABLED === "true" &&
+    typeof env.TURNSTILE_SITE_KEY === "string" && env.TURNSTILE_SITE_KEY.length >= 20 &&
+    typeof env.TURNSTILE_SECRET_KEY === "string" && env.TURNSTILE_SECRET_KEY.length >= 20 &&
+    typeof env.ENQUIRY_BRIDGE_TOKEN === "string" && env.ENQUIRY_BRIDGE_TOKEN.length >= 32 &&
+    typeof env.ENQUIRY_APPS_SCRIPT_URL === "string" &&
+    /^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(env.ENQUIRY_APPS_SCRIPT_URL) &&
+    Boolean(env.DB && env.AVAILABILITY_HASH_SALT && env.AVAILABILITY_HASH_SALT.length >= 24);
+}
+
+function enquiryConfig(request, env) {
+  if (request.method !== "GET") return reply({ error: "method_not_allowed" }, 405);
+  if (enquiryBridgeReady(env)) {
+    // Site key is public; all private values remain Worker secrets.
+    return reply({ mode: "turnstile", sitekey: env.TURNSTILE_SITE_KEY });
+  }
+  return reply({ mode: "hcaptcha" });
+}
+
+function safeField(input, limit) {
+  return typeof input === "string" && input.length <= limit ? input.trim() : null;
+}
+
+async function withinEnquiryLimit(db, fingerprint) {
+  const now = Math.floor(Date.now() / 1000);
+  const windows = [
+    { bucket: "enquiry-hour:" + Math.floor(now / 3600), max: 5, ttl: 7200 },
+    { bucket: "enquiry-day:" + Math.floor(now / 86400), max: 12, ttl: 172800 }
+  ];
+  for (const period of windows) {
+    const row = await db.prepare(
+      "INSERT INTO availability_checks (visitor, bucket, hits, expires_at) " +
+      "VALUES (?, ?, 1, ?) " +
+      "ON CONFLICT(visitor, bucket) DO UPDATE SET hits=hits+1 RETURNING hits"
+    ).bind(fingerprint, period.bucket, now + period.ttl).first();
+    if (!row || row.hits > period.max) return false;
+  }
+  return true;
+}
+
+async function sendTurnstileEnquiry(request, env) {
+  if (request.method !== "POST") return reply({ error: "method_not_allowed" }, 405);
+  if (!enquiryBridgeReady(env)) return reply({ error: "not_configured" }, 503);
+
+  const url = new URL(request.url);
+  const origin = request.headers.get("Origin");
+  if (origin && origin !== url.origin) return reply({ error: "forbidden" }, 403);
+  const site = request.headers.get("Sec-Fetch-Site");
+  if (site && site !== "same-origin" && site !== "none") return reply({ error: "forbidden" }, 403);
+  if (!(request.headers.get("Content-Type") || "").toLowerCase().startsWith("application/json")) {
+    return reply({ error: "invalid_content_type" }, 415);
+  }
+  if (Number(request.headers.get("Content-Length") || 0) > 12000) {
+    return reply({ error: "payload_too_large" }, 413);
+  }
+
+  const ip = request.headers.get("CF-Connecting-IP");
+  if (!ip) return reply({ error: "temporarily_unavailable" }, 503);
+  let payload;
+  try {
+    const raw = await request.text();
+    if (raw.length > 9000) return reply({ error: "payload_too_large" }, 413);
+    payload = JSON.parse(raw);
+  } catch (_) {
+    return reply({ error: "invalid_json" }, 400);
+  }
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+    return reply({ error: "invalid_body" }, 400);
+  }
+
+  // Do not pass arbitrary user-supplied properties, headers or HTML to the mailer.
+  if (payload.botcheck) return reply({ success: true });
+  const name = safeField(payload.name, 100);
+  const email = safeField(payload.email, 150);
+  const phone = safeField(payload.phone ?? "", 40);
+  const eventType = safeField(payload.eventType, 100);
+  const eventDate = safeField(payload.eventDate, 10);
+  const location = safeField(payload.location, 80);
+  const notes = safeField(payload.notes ?? "", 1500);
+  const token = safeField(payload.turnstileToken, 2048);
+  const emailValid = email && /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(email);
+  const valid = name && name.length >= 2 && emailValid && phone !== null &&
+    eventType && eventType.length >= 2 && eventDate && validDate(eventDate) &&
+    location && location.length >= 2 && notes !== null && token &&
+    token.length >= 10 && payload.consent === true;
+  if (!valid) return reply({ error: "invalid_fields" }, 400);
+
+  const first = currentDateInSlovenia();
+  const end = new Date(first + "T00:00:00Z");
+  end.setUTCFullYear(end.getUTCFullYear() + 2);
+  if (eventDate < first || eventDate > end.toISOString().slice(0, 10)) {
+    return reply({ error: "invalid_date" }, 400);
+  }
+  try {
+    const fingerprint = await hashIp(ip, env.AVAILABILITY_HASH_SALT);
+    if (!(await withinEnquiryLimit(env.DB, fingerprint))) {
+      return reply({ error: "rate_limited" }, 429);
+    }
+    const booked = await env.DB.prepare(
+      "SELECT date FROM booked_dates WHERE date = ? LIMIT 1"
+    ).bind(eventDate).first();
+    if (booked) return reply({ error: "booked" }, 409);
+
+    const verificationAbort = new AbortController();
+    const verificationTimer = setTimeout(() => verificationAbort.abort(), 8000);
+    let verification;
+    try {
+      const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ secret: env.TURNSTILE_SECRET_KEY, response: token, remoteip: ip }),
+        signal: verificationAbort.signal
+      });
+      verification = response.ok ? await response.json() : null;
+    } finally {
+      clearTimeout(verificationTimer);
+    }
+    if (!verification || verification.success !== true ||
+        verification.hostname !== url.hostname || verification.action !== "dj_enquiry") {
+      return reply({ error: "verification_required" }, 403);
+    }
+
+    // Apps Script sends a message from the owner's Google account to their inbox.
+    // Its endpoint and shared secret are never exposed to the browser.
+    const mailAbort = new AbortController();
+    const mailTimer = setTimeout(() => mailAbort.abort(), 14000);
+    let mailResult;
+    try {
+      const mailResponse = await fetch(env.ENQUIRY_APPS_SCRIPT_URL, {
+        method: "POST",
+        redirect: "follow",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          bridgeToken: env.ENQUIRY_BRIDGE_TOKEN,
+          name, email, phone, eventType, eventDate, location, notes
+        }),
+        signal: mailAbort.signal
+      });
+      mailResult = mailResponse.ok ? await mailResponse.json().catch(() => null) : null;
+    } finally {
+      clearTimeout(mailTimer);
+    }
+    if (!mailResult || mailResult.ok !== true) return reply({ error: "delivery_unconfirmed" }, 502);
+    return reply({ success: true });
+  } catch (error) {
+    // No personal details, keys or captcha tokens in Worker logs.
+    console.error("Turnstile enquiry handler failed:", error?.name || "unknown");
+    return reply({ error: "delivery_unconfirmed" }, 503);
+  }
+}
+
 export default {
   async fetch(request, env) {
     const path = new URL(request.url).pathname;
     if (path === "/api/availability") return checkAvailability(request, env);
+    if (path === "/api/enquiry/config") return enquiryConfig(request, env);
+    if (path === "/api/enquiry") return sendTurnstileEnquiry(request, env);
     if (path === "/api/admin/dates") return managePrivateDates(request, env);
     if (path.startsWith("/api/")) return reply({ status: "unknown" }, 404);
     if (path === "/admin.html" || path === "/admin") {
