@@ -13,7 +13,7 @@
       faq4Q:'Kako preverim prost termin?',faq4A:'Piši na Messenger ali pošlji povpraševanje z datumom in krajem dogodka. Odgovorim po preverjanju termina.',
       privacyLink:'ZASEBNOST',formOpenMail:'ODPRI E-POŠTO',formOpenMessenger:'MESSENGER',
       formRecover:'Oddaja ni bila potrjena. Podatki ostanejo v obrazcu; pošlji povpraševanje prek e-pošte ali Messengerja.',
-      formSending:'POŠILJANJE ...',formSuccess:'Povpraševanje je Web3Forms sprejel. Za dokončno potrditev preveri še, ali je sporočilo prispelo v nabiralnik.',
+      captchaIntro:'ZAŠČITA PRED NEŽELENO POŠTO · Potrdi, da nisi robot.',captchaRequired:'Pred pošiljanjem prosim potrdi preverjanje »Nisem robot«.',captchaUnavailable:'Varnostnega preverjanja ni mogoče naložiti. Poskusi osvežiti stran ali mi piši prek Messengerja.',captchaRetry:'Povpraševanje ni bilo poslano. Po potrebi ponovno opravi preverjanje »Nisem robot« in poskusi znova.',formSending:'POŠILJANJE ...',formSuccess:'Povpraševanje je Web3Forms sprejel. Za dokončno potrditev preveri še, ali je sporočilo prispelo v nabiralnik.',
       formFailure:'Zunanja storitev se ni odzvala ali oddaje ni potrdila. Povpraševanja zato ne moremo šteti kot poslanega.',
       formServiceNote:'Podatki se pošljejo prek zunanjega ponudnika Web3Forms. Če ta ni dosegljiv, bo na voljo druga možnost stika.',
       formPrivacy:'Razumem, da bodo moji podatki uporabljeni za odgovor na povpraševanje in posredovani prek storitve Web3Forms. Preberem lahko <a href="zasebnost.html" target="_blank" rel="noopener noreferrer">obvestilo o zasebnosti</a>.',
@@ -41,7 +41,7 @@
       faq4Q:'How can I check availability?',faq4A:'Send a Messenger message or a booking enquiry with the event date and location. I will reply after checking availability.',
       privacyLink:'PRIVACY',formOpenMail:'OPEN EMAIL APP',formOpenMessenger:'MESSENGER',
       formRecover:'Submission could not be confirmed. Your details are still in the form. Please email your enquiry or use Messenger.',
-      formSending:'SENDING ...',formSuccess:'Web3Forms accepted your enquiry. I will confirm availability after receiving the email.',
+      captchaIntro:'SPAM PROTECTION · Please confirm you are not a robot.',captchaRequired:'Please complete the “I am human” check before sending.',captchaUnavailable:'The security check could not load. Please refresh the page or contact me via Messenger.',captchaRetry:'Your request was not sent. Please complete the captcha again if needed and retry.',formSending:'SENDING ...',formSuccess:'Web3Forms accepted your enquiry. I will confirm availability after receiving the email.',
       formFailure:'The external service was unavailable or did not confirm submission. We cannot mark your message as sent.',
       formServiceNote:'Your details are handled by the external provider Web3Forms. If it is unavailable, an alternative contact option will appear.',
       formPrivacy:'I understand that my details will be used to respond to my enquiry and processed via Web3Forms. Read the <a href="zasebnost.html" target="_blank" rel="noopener noreferrer">privacy notice</a>.',
@@ -94,6 +94,15 @@
     const emailFallback = choose('fallback-mailto');
     const submitButton = bookingForm.querySelector('button[type="submit"]');
     const submitText = submitButton.querySelector('[data-t="formGenerate"]');
+    const captchaBox = bookingForm.querySelector('.h-captcha');
+    let lastSuccessAt = 0;
+    const showFormIssue = (text) => {
+      status.hidden = false;
+      status.dataset.state = 'error';
+      status.textContent = text;
+      if (emailFallback) emailFallback.href = buildMailto();
+      recovery.hidden = false;
+    };
     const fieldValue = (id) => (choose(id)?.value || '').trim();
     const buildMailto = () => {
       const name = fieldValue('client-name');
@@ -116,6 +125,19 @@
     bookingForm.addEventListener('submit', async (event) => {
       event.preventDefault();
       if (submitButton.disabled || !bookingForm.reportValidity()) return;
+      // Web3Forms hCaptcha must be verified by its backend; this only gives clear UX.
+      const captchaToken = bookingForm.querySelector('[name="h-captcha-response"]')?.value?.trim();
+      if (!captchaToken) {
+        const captchaLoaded = Boolean(captchaBox?.querySelector('iframe'));
+        showFormIssue(captchaLoaded ? strings[lang].captchaRequired : strings[lang].captchaUnavailable);
+        captchaBox?.scrollIntoView({ behavior:'smooth', block:'center' });
+        return;
+      }
+      // Small accidental-double-submit guard in this tab; not a server-side spam limit.
+      if (Date.now() - lastSuccessAt < 45000) {
+        showFormIssue(strings[lang].captchaRetry);
+        return;
+      }
       submitButton.disabled = true;
       if (window.DJArwennAvailability && choose('event-date')?.value) {
         const statusOfDate = await window.DJArwennAvailability.lookup(choose('event-date').value);
@@ -128,7 +150,7 @@
         }
       }
       const formData = new FormData(bookingForm);
-      if (formData.get('botcheck')) return;
+      if (formData.get('botcheck')) { submitButton.disabled = false; return; }
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 18000);
       submitButton.disabled = true;
@@ -148,12 +170,16 @@
         }
         status.dataset.state = 'success';
         status.textContent = strings[lang].formSuccess;
+        lastSuccessAt = Date.now();
         bookingForm.reset();
+        if (window.hcaptcha && captchaBox) {
+          try { window.hcaptcha.reset(); } catch (_) { /* Widget may already be unmounted. */ }
+        }
       } catch (_error) {
-        status.dataset.state = 'error';
-        status.textContent = strings[lang].formFailure;
-        if (emailFallback) emailFallback.href = buildMailto();
-        recovery.hidden = false;
+        showFormIssue(strings[lang].formFailure);
+        if (window.hcaptcha && captchaBox) {
+          try { window.hcaptcha.reset(); } catch (_) { /* Allow manual retry. */ }
+        }
       } finally {
         clearTimeout(timeoutId);
         submitButton.disabled = false;
