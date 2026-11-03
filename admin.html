@@ -40,6 +40,9 @@
     .top-link{display:inline-block;margin-top:14px;font-size:13px}
     #generated-key{width:100%;min-height:84px;resize:none;font:600 13px/1.5 ui-monospace,Consolas,monospace;background:#f8f6f7;color:#19151a;border:1px solid #ac9da5;word-break:break-all;overflow-wrap:anywhere;margin:12px 0 0}
     #copy-key{width:100%;margin-top:10px}
+    #admin-login-form{margin:0}
+    .admin-user{background:#29252d;color:#f5e7eb;border-color:#665862;cursor:default}
+    .admin-login-note{margin:10px 0 0}
     @media(max-width:440px){.card{padding:16px}.dates li{gap:6px}.dates li button{padding:9px}.row>button{flex:1 1 100%}}
   </style>
 </head>
@@ -53,10 +56,15 @@
   </header>
   <section class="card" id="login">
     <h2>Zasebni dostop</h2>
-    <label for="token">Skrbniški ključ</label>
-    <input id="token" type="password" autocomplete="off" spellcheck="false" placeholder="Prilepi svoj zasebni ključ">
-    <p class="hint">Ključ ni isto kot AVAILABILITY_HASH_SALT. Na Cloudflare Workerju mora biti nastavljen kot skrivnost DJ_ARWENN_ADMIN_TOKEN (najmanj 32 znakov). Ključ ostane samo v pomnilniku te strani, ne v shrambi brskalnika.</p>
-    <div class="row"><button id="sign-in" type="button">ODPRI TERMINE</button><button id="make-key" type="button" class="secondary">USTVARI NOV KLJUČ</button></div>
+    <form id="admin-login-form" method="post" action="/admin.html" autocomplete="on" onsubmit="return false">
+      <label for="admin-username">Račun</label>
+      <input id="admin-username" class="admin-user" type="text" name="username" value="dj-arwenn-admin" autocomplete="username" readonly>
+      <label for="token" style="margin-top:13px">Skrbniški ključ</label>
+      <input id="token" type="password" name="password" autocomplete="current-password" spellcheck="false" placeholder="Prilepi svoj zasebni ključ" required minlength="32">
+      <p class="hint">Ključ ni isto kot AVAILABILITY_HASH_SALT. Na Cloudflare Workerju mora biti nastavljen kot skrivnost DJ_ARWENN_ADMIN_TOKEN (najmanj 32 znakov).</p>
+      <div class="row"><button id="sign-in" type="submit">ODPRI TERMINE</button><button id="make-key" type="button" class="secondary">USTVARI NOV KLJUČ</button></div>
+      <p class="hint admin-login-note">Prijava podpira samodejno izpolnjevanje gesel. Če Google ne ponudi shranjevanja, ključ ročno dodaj v Google Upravitelj gesel za ta naslov.</p>
+    </form>
     <div id="generated-tools" hidden>
       <label for="generated-key">Nov ustvarjeni ključ (pritisni Kopiraj)</label>
       <textarea id="generated-key" readonly rows="3" spellcheck="false" autocomplete="off" aria-label="Novi skrbniški ključ"></textarea>
@@ -151,14 +159,17 @@
       notice(action==='book'?'Datum '+fmt(date)+' je označen kot zaseden.':'Datum '+fmt(date)+' je ponovno sproščen.',true);
     });
   }
-  el('sign-in').addEventListener('click',()=>run(async()=>{
+  el('admin-login-form').addEventListener('submit',(event)=>{
+    event.preventDefault();
+    run(async()=>{
     token=tokenField.value.trim();
     if(token.length<32){notice('Vnesi skrbniški ključ z najmanj 32 znaki.');token='';return}
     await refresh();
     tokenField.value='';el('generated-key').value='';el('generated-tools').hidden=true;
     login.hidden=true;manager.hidden=false;
     notice('Dostop je uspešno potrjen.',true);
-  }));
+    });
+  });
   el('sign-out').addEventListener('click',lock);
   el('refresh').addEventListener('click',()=>run(async()=>{await refresh();notice('Seznam je osvežen.',true)}));
   el('book').addEventListener('click',()=>change('book',dateField.value));
