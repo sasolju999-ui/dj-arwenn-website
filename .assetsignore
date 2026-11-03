@@ -1,0 +1,10 @@
+# Publish only the public DJ Arwenn website files.
+# Wrangler static assets use gitignore-style rules.
+*
+!index.html
+!styles.css
+!app.js
+!robots.txt
+!assets/
+assets/*
+!assets/favicon.svg
