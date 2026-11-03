@@ -539,3 +539,72 @@ h1 em,h2 em,.section h2 em,.contact h2 em{color:#f04761;font-style:normal}
   .availability-controls button {min-height:51px}
   #inquiry-form {scroll-margin-top:20px}
 }
+
+/* V10: mobile booking form accessibility — contrast, tap targets, spacing. */
+.inquiry-card .inquiry-consent{
+  color:#312d30;
+  background:#fff;
+  border:1px solid #d9d3d5;
+  border-radius:9px;
+  padding:13px 14px;
+  margin:18px 0 16px;
+  font-size:13px;
+  line-height:1.65;
+  cursor:pointer;
+}
+.inquiry-card .inquiry-consent span{color:inherit;overflow-wrap:anywhere}
+.inquiry-card .inquiry-consent input[type="checkbox"]{
+  width:20px;height:20px;min-width:20px;
+  flex:0 0 20px;margin:2px 0 0;
+  accent-color:#c90c2e;
+}
+.inquiry-card .inquiry-consent a{
+  color:#911130;
+  font-weight:800;
+  text-decoration:underline;
+  text-decoration-thickness:1.5px;
+  text-underline-offset:3px;
+}
+.inquiry-card .inquiry-consent a:focus-visible{
+  outline:3px solid #ed2950;outline-offset:3px;border-radius:2px;
+}
+.inquiry-card .form-help.form-service-note{
+  color:#575158;
+  font-size:12px;
+  line-height:1.7;
+  margin-top:15px;
+}
+.inquiry-card .field input:-webkit-autofill,
+.inquiry-card .field input:-webkit-autofill:hover,
+.inquiry-card .field input:-webkit-autofill:focus{
+  -webkit-text-fill-color:#201f20;
+  box-shadow:0 0 0 1000px #fff inset;
+  caret-color:#201f20;
+}
+@media(max-width:650px){
+  .contact-layout{gap:26px}
+  .inquiry-card{padding:23px 18px 26px}
+  .inquiry-card .inquiry-head{gap:10px}
+  .inquiry-card .inquiry-head h3{line-height:1.07;font-size:clamp(25px,7vw,33px)}
+  .inquiry-card .inquiry-label{font-size:10px;line-height:1.6}
+  .inquiry-card .form-help{font-size:13px;line-height:1.65}
+  .inquiry-card .field{margin-bottom:16px}
+  .inquiry-card .field label{font-size:11px;letter-spacing:.075em;line-height:1.5}
+  .inquiry-card .field input,
+  .inquiry-card .field select,
+  .inquiry-card .field textarea{
+    border-radius:6px;
+    padding:12px 13px;
+    min-height:50px;
+    font-size:16px;
+    line-height:1.45;
+  }
+  .inquiry-card .field textarea{min-height:100px}
+  .inquiry-card .inquiry-consent{padding:13px 12px;margin-top:17px}
+  .inquiry-card .form-submit{min-height:54px;border-radius:7px;font-size:12px}
+  .inquiry-card .form-status{font-size:13px}
+}
+@media(max-width:390px){
+  .inquiry-card{padding-inline:15px}
+  .inquiry-card .availability-check{padding-inline:13px}
+}
