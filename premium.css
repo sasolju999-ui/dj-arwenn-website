@@ -373,3 +373,43 @@ h1 em,h2 em,.section h2 em,.contact h2 em{color:#f04761;font-style:normal}
 @media(max-width:360px){
   .moments .moment-card .moment-content h3{font-size:30px}
 }
+
+
+/* Premium V6 — readable Moments card headlines (remove inherited Impact/condensed font). */
+.moments .moment-card .moment-content{
+  width:100%;
+  max-width:min(100%,315px);
+  padding-right:0;
+}
+.moments .moment-card .moment-content h3{
+  font-family:Inter,"Segoe UI",Arial,Helvetica,sans-serif!important;
+  font-stretch:normal!important;
+  font-style:normal;
+  font-weight:800;
+  font-size:clamp(27px,2.35vw,34px);
+  line-height:1.18;
+  letter-spacing:-.012em!important;
+  word-spacing:normal;
+  text-transform:uppercase;
+  text-shadow:none;
+  width:100%;
+  max-width:100%!important;
+  overflow-wrap:normal;
+  word-break:normal;
+  white-space:normal;
+  text-wrap:balance;
+}
+.moments .moment-card .moment-category{
+  font-family:Inter,"Segoe UI",Arial,sans-serif;
+  font-stretch:normal;
+}
+@media(max-width:650px){
+  .moments .moment-card .moment-content{max-width:100%}
+  .moments .moment-card .moment-content h3{
+    font-size:clamp(28px,7.9vw,34px);
+    line-height:1.17;
+  }
+}
+@media(max-width:360px){
+  .moments .moment-card .moment-content h3{font-size:28px}
+}
