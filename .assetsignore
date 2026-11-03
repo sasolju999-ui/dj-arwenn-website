@@ -13,5 +13,3 @@ assets/*
 !assets/dj-arwenn-logo-transparent.png
 !zasebnost.html
 !sitemap.xml
-!calendar.js
-!booked-dates.json
