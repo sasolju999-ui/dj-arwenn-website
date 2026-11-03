@@ -20,10 +20,7 @@
   <div class="noise" aria-hidden="true"></div>
   <header class="site-header" id="top">
     <div class="container header-inner">
-      <a class="brand" href="#top" aria-label="DJ Arwenn – domov">
-        <span class="brand-mark" aria-hidden="true"><span></span></span>
-        <span class="brand-type">DJ <b>ARWENN</b><small>GOOD MUSIC. GREAT NIGHTS.</small></span>
-      </a>
+      <a class="brand" href="#top" aria-label="DJ Arwenn – domov"><img class="brand-logo-img" src="assets/dj-arwenn-logo-transparent.png" alt="DJ Arwenn" width="980" height="390" decoding="async" /></a>
       <nav class="nav" id="main-nav" aria-label="Glavna navigacija">
         <a href="#storitve" data-t="navServices">Dogodki</a>
         <a href="#glasba" data-t="navMusic">Glasba</a>
@@ -60,7 +57,7 @@
           
           
           <div class="portrait-disc">
-            <img src="https://ugc.production.linktr.ee/8303e9e0-6504-4086-b790-83d019094d40_1000030492.jpeg?io=true&amp;size=avatar-v3_0" alt="DJ Arwenn – portret" loading="eager" onerror="this.style.display='none'" />
+            <img src="assets/dj-arwenn-portret.webp" alt="DJ Arwenn – portret" width="1024" height="1536" loading="eager" fetchpriority="high" decoding="async" />
             <div class="portrait-tint"></div>
           </div>
           
@@ -100,11 +97,43 @@
     </section>
 
     <section class="section contact" id="kontakt" aria-labelledby="contact-title"><div class="contact-glow" aria-hidden="true"></div><div class="container contact-layout"><div class="contact-copy reveal"><div class="section-kicker"><span>04 / </span><span data-t="contactKicker">REZERVACIJE IN POVPRAŠEVANJA</span></div><h2 id="contact-title" data-t="contactTitle">IMAŠ DATUM?<br /><em>JAZ IMAM BEAT.</em></h2><p data-t="contactLead">Povej mi, kakšno zabavo pripravljaš. Preveriva termin in skupaj začrtava pravi glasbeni večer.</p><a class="btn btn-primary contact-direct" href="https://m.me/DJArwenn" target="_blank" rel="noopener noreferrer"><span data-t="directMessenger">PIŠI MI NA MESSENGER</span><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><p class="contact-note" data-t="contactNote">Najhitreje me dosežeš prek Facebook Messengerja.</p></div>
-      <div class="inquiry-card reveal"><div class="inquiry-head"><div><div class="inquiry-label">QUICK INQUIRY / DJ ARWENN</div><h3 data-t="formTitle">SESTAVI POVPRAŠEVANJE</h3></div><span class="inquiry-icon" aria-hidden="true">↗</span></div><p class="form-help" data-t="formHelp">Izpolni podatke, pripravi sporočilo in ga kopiraj v Messenger.</p><form id="inquiry-form"><div class="field"><label for="event-type" data-t="fieldType">VRSTA DOGODKA</label><select id="event-type" name="event-type"><option value="party" data-t="typeParty">Rojstni dan / zasebna zabava</option><option value="wedding" data-t="typeWedding">Poroka</option><option value="business" data-t="typeBusiness">Poslovni dogodek</option><option value="club" data-t="typeClub">Klub / javna prireditev</option><option value="other" data-t="typeOther">Drugo</option></select></div><div class="field-row"><div class="field"><label for="event-date" data-t="fieldDate">DATUM</label><input id="event-date" name="event-date" type="date" required /></div><div class="field"><label for="event-location" data-t="fieldLocation">KRAJ DOGODKA</label><input id="event-location" name="event-location" type="text" maxlength="80" placeholder="npr. Ptuj" data-t-placeholder="locationPlaceholder" required /></div></div><div class="field"><label for="event-notes" data-t="fieldNotes">DODATNE INFORMACIJE (NEOBVEZNO)</label><textarea id="event-notes" name="event-notes" rows="3" maxlength="550" placeholder="Okvirno število gostov, glasbene želje ..." data-t-placeholder="notesPlaceholder"></textarea></div><button type="submit" class="btn btn-primary form-submit"><span data-t="formGenerate">PRIPRAVI SPOROČILO</span><span aria-hidden="true">→</span></button></form><div class="message-result" id="message-result" hidden><label for="message-preview" data-t="messageLabel">TVOJE SPOROČILO</label><textarea id="message-preview" rows="6" readonly></textarea><div class="result-actions"><button type="button" class="btn btn-copy" id="copy-message" data-t="copyButton">KOPIRAJ SPOROČILO</button><a class="btn btn-messenger" href="https://m.me/DJArwenn" target="_blank" rel="noopener noreferrer" data-t="openMessenger">ODPRI MESSENGER ↗</a></div><p class="form-help" data-t="messageHelp">Sporočilo se ne pošlje samodejno. Prilepi ga v Messenger in pošlji.</p></div></div>
+      <div class="inquiry-card reveal">
+ <div class="inquiry-head"><div><div class="inquiry-label">BOOKING REQUEST / DJ ARWENN</div><h3 data-t="formTitle">POŠLJI POVPRAŠEVANJE</h3></div><span class="inquiry-icon" aria-hidden="true">↗</span></div>
+ <p class="form-help" data-t="formHelp">Izpolni obrazec. Povpraševanje bom prejel po e-pošti in ti lahko odgovoril neposredno.</p>
+ <form id="inquiry-form" action="https://formsubmit.co/sasolju999@gmail.com" method="POST" accept-charset="UTF-8">
+ <input type="hidden" name="_subject" value="DJ Arwenn | Novo povpraševanje za nastop">
+ <input type="hidden" name="_template" value="table">
+ <input type="hidden" name="_captcha" value="true">
+ <input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off" aria-hidden="true">
+ <div class="field-row">
+  <div class="field"><label for="client-name" data-t="fieldName">IME IN PRIIMEK</label><input id="client-name" name="Ime in priimek" type="text" maxlength="100" autocomplete="name" required placeholder="Ime in priimek" data-t-placeholder="namePlaceholder" /></div>
+  <div class="field"><label for="client-email" data-t="fieldEmail">E-POŠTA</label><input id="client-email" name="email" type="email" maxlength="150" autocomplete="email" required placeholder="ime@primer.si" data-t-placeholder="emailPlaceholder" /></div>
+ </div>
+ <div class="field"><label for="client-phone" data-t="fieldPhone">TELEFON (NEOBVEZNO)</label><input id="client-phone" name="Telefon" type="tel" maxlength="40" autocomplete="tel" placeholder="+386 ..." data-t-placeholder="phonePlaceholder" /></div>
+ <div class="field"><label for="event-type" data-t="fieldType">VRSTA DOGODKA</label><select id="event-type" name="Vrsta dogodka"><option value="Rojstni dan / zasebna zabava" data-t="typeParty">Rojstni dan / zasebna zabava</option><option value="Poroka" data-t="typeWedding">Poroka</option><option value="Poslovni dogodek" data-t="typeBusiness">Poslovni dogodek</option><option value="Klub / javna prireditev" data-t="typeClub">Klub / javna prireditev</option><option value="Drugo" data-t="typeOther">Drugo</option></select></div>
+ <div class="field-row">
+  <div class="field"><label for="event-date" data-t="fieldDate">DATUM</label><input id="event-date" name="Datum dogodka" type="date" required /></div>
+  <div class="field"><label for="event-location" data-t="fieldLocation">KRAJ DOGODKA</label><input id="event-location" name="Kraj dogodka" type="text" maxlength="80" placeholder="npr. Ptuj" data-t-placeholder="locationPlaceholder" required /></div>
+ </div>
+ <div class="field"><label for="event-notes" data-t="fieldNotes">DODATNE INFORMACIJE (NEOBVEZNO)</label><textarea id="event-notes" name="Sporočilo" rows="4" maxlength="1500" placeholder="Okvirno število gostov, glasbene želje ..." data-t-placeholder="notesPlaceholder"></textarea></div>
+ <label class="inquiry-consent"><input type="checkbox" name="Strinjam se z obdelavo podatkov za odgovor" value="Da" required /><span data-t="formPrivacy">Strinjam se, da se posredovani podatki uporabijo za odgovor na povpraševanje. Sporočilo posreduje storitev FormSubmit.</span></label>
+ <button type="submit" class="btn btn-primary form-submit"><span data-t="formGenerate">POŠLJI POVPRAŠEVANJE</span><span aria-hidden="true">→</span></button>
+ <p class="form-help form-service-note" data-t="formServiceNote">Obrazec deluje prek storitve FormSubmit. Pošiljanje bo aktivno po potrditvi e-poštnega naslova prejemnika.</p>
+ </form>
+</div>
       </div></section>
   </main>
   <a class="mobile-book" href="https://m.me/DJArwenn" target="_blank" rel="noopener noreferrer"><span data-t="mobileBook">PREVERI PROST TERMIN</span><span aria-hidden="true">↗</span></a>
-  <footer class="footer"><div class="container"><div class="footer-top"><a class="brand brand-footer" href="#top"><span class="brand-mark" aria-hidden="true"><span></span></span><span class="brand-type">DJ <b>ARWENN</b><small>GOOD MUSIC. GREAT NIGHTS.</small></span></a><span class="footer-tag" data-t="footerTag">TVOJ VEČER. TVOJ RITEM.</span><a class="back-top" href="#top" aria-label="Nazaj na vrh">↑</a></div><div class="footer-bottom"><span>© <span id="year">2026</span> DJ ARWENN</span><span data-t="footerPrivacy">Brez sledilnih piškotkov · Zunanje povezave imajo svoje pogoje.</span><div><a href="https://www.facebook.com/DJArwenn" target="_blank" rel="noopener noreferrer">FACEBOOK</a><a href="https://www.instagram.com/DJArwenn" target="_blank" rel="noopener noreferrer">INSTAGRAM</a><a href="https://linktr.ee/DJArwenn" target="_blank" rel="noopener noreferrer">LINKTREE</a></div></div></div></footer>
+  <footer class="footer"><div class="container">
+ <div class="footer-top"><a class="brand brand-footer" href="#top" aria-label="DJ Arwenn – nazaj na vrh"><img class="brand-logo-img" src="assets/dj-arwenn-logo-transparent.png" alt="DJ Arwenn" width="980" height="390" decoding="async" /></a><span class="footer-tag" data-t="footerTag">TVOJ VEČER. TVOJ RITEM.</span><a class="back-top" href="#top" aria-label="Nazaj na vrh">↑</a></div>
+ <div class="footer-social"><h3 data-t="footerSocialTitle">POVEŽIMO SE</h3><nav class="social-links" aria-label="Družabna omrežja in kontakt"><a href="https://m.me/DJArwenn" target="_blank" rel="noopener noreferrer" aria-label="Messenger" ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a9 9 0 0 1-9.1 8.4 10 10 0 0 1-3.4-.6L4 21l1.3-4.2A8.6 8.6 0 0 1 3 11.5C3 6.8 7 3 12 3s9 3.8 9 8.5Z"/><path d="m7 14 4-4 3 3 3-4-4 2.5-3-3L7 14Z" stroke="none" fill="currentColor"/></svg><span>MESSENGER</span></a>
+<a href="https://www.facebook.com/DJArwenn" target="_blank" rel="noopener noreferrer" aria-label="Facebook" ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.3 21v-7.8h2.6l.4-3.2h-3V8c0-.9.25-1.5 1.55-1.5H17V3.6c-.5-.1-1.45-.2-2.65-.2-2.7 0-4.4 1.65-4.4 4.7V10H7.3v3.2h2.65V21"/></svg><span>FACEBOOK</span></a>
+<a href="https://www.instagram.com/DJArwenn" target="_blank" rel="noopener noreferrer" aria-label="Instagram" ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.8" r="1" fill="currentColor" stroke="none"/></svg><span>INSTAGRAM</span></a>
+<a href="https://linktr.ee/DJArwenn" target="_blank" rel="noopener noreferrer" aria-label="SoundCloud – odpri Linktree s povezavami" title="SoundCloud prek Linktreeja – neposredno povezavo še potrjujemo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 14v4M6 11v7M9 10v8M12 9v9"/><path d="M15 18h3.5a3.5 3.5 0 1 0-.7-6.9A5.7 5.7 0 0 0 13.3 8a5.5 5.5 0 0 0-1.3.15V18h3Z"/></svg><span>SOUNDCLOUD</span></a>
+<a href="https://linktr.ee/DJArwenn" target="_blank" rel="noopener noreferrer" aria-label="Linktree" ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18M4 9l8-6 8 6M4 15l8-6 8 6"/><path d="M4 9h16M4 15h16"/></svg><span>LINKTREE</span></a>
+<a href="mailto:sasolju999@gmail.com"  aria-label="Pošlji e-pošto" ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="m3 7 9 7 9-7"/></svg><span>E-POŠTA</span></a></nav></div>
+ <div class="footer-bottom"><span>© <span id="year">2026</span> DJ ARWENN</span><span data-t="footerPrivacy">Brez sledilnih piškotkov · Zunanje povezave imajo svoje pogoje.</span></div>
+</div></footer>
   <script defer src="app.js"></script>
 </body>
 </html>
