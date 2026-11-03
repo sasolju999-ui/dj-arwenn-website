@@ -152,3 +152,54 @@ h1 em,h2 em,.section h2 em,.contact h2 em{color:#f04761;font-style:normal}
   .hero-buttons .btn-primary{font-size:9px}
 }
 @media(prefers-reduced-motion:reduce){.js-ready .reveal{opacity:1;transform:none}}
+
+
+/* Fix: older mobile CSS kept the hero image absolutely positioned off-screen. */
+@media (max-width:650px) {
+  .hero-grid .hero-art {
+    position:relative!important;
+    display:block;
+    left:auto!important;
+    right:auto!important;
+    top:auto!important;
+    bottom:auto!important;
+    min-width:0!important;
+    max-width:100%!important;
+    width:100%!important;
+    height:clamp(310px,106vw,445px)!important;
+    margin:0!important;
+    transform:none!important;
+    align-self:stretch;
+    pointer-events:none;
+  }
+  .hero-grid .portrait-disc {
+    position:absolute;
+    inset:0;
+    width:100%!important;
+    max-width:100%!important;
+    height:100%!important;
+    transform:none!important;
+  }
+  .hero-grid .live-pill {
+    z-index:5;
+    left:12px;
+    right:12px;
+    bottom:15px;
+  }
+}
+/* Neutral brand fallback if the externally hosted photo fails to load. */
+.portrait-disc::after {
+  content:"DJ ARWENN";
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  padding:18px;
+  color:#ffffff69;
+  font-size:clamp(28px,4vw,44px);
+  font-weight:900;
+  letter-spacing:.13em;
+  background:linear-gradient(145deg,#27262a 5%,#0f1012 82%);
+  z-index:0;
+}
+.portrait-disc img {z-index:1;display:block}
