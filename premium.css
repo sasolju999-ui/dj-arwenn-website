@@ -218,3 +218,74 @@ h1 em,h2 em,.section h2 em,.contact h2 em{color:#f04761;font-style:normal}
 .inquiry-card input[type=email],.inquiry-card input[type=tel]{width:100%}
 .form-service-note{margin:12px 0 0;font-size:11px;line-height:1.6}
 @media(max-width:650px){.brand-logo-img{width:150px;max-height:56px}.brand-footer .brand-logo-img{width:170px}.social-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.social-links a{min-height:52px;padding:12px 10px;font-size:10px;gap:8px}.social-links svg{width:19px;height:19px}.footer-social{padding:25px 0 31px}.footer-top{gap:14px}}
+
+
+/* Premium V3: clean music title and social cards across desktop and mobile. */
+.music-panel{position:relative}
+.music-panel>.music-ring{opacity:.07;pointer-events:none;z-index:0}
+.music-panel>.music-panel-top,.music-panel>.genre-label,.music-panel>.genre-tags,.music-panel>.music-panel-foot{position:relative;z-index:2}
+.music-panel .genre-label{
+  color:#fff;font-family:Inter,"Segoe UI",Arial,sans-serif;
+  font-size:clamp(29px,3vw,44px);line-height:1.05;
+  max-width:none;letter-spacing:-.052em;
+  margin:24px 0 24px;font-weight:900;text-shadow:0 7px 25px #0009;
+}
+.music-panel .genre-label span{white-space:nowrap}
+.music-panel .genre-tags{position:relative;z-index:2;display:flex;flex-wrap:wrap;gap:9px}
+.moments .moments-grid{display:grid;grid-template-columns:1.1fr 1fr .9fr;gap:16px}
+.moments .moment-card{
+  position:relative;isolation:isolate;overflow:hidden;
+  display:flex;flex-direction:column;justify-content:space-between;
+  min-height:340px;height:390px;padding:28px;
+  border:1px solid #ffffff29;border-radius:11px;
+  background:#171719;transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease;
+}
+.moments .moment-card::before{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:1;
+  background:linear-gradient(90deg,#0b0b0feF 0%,#0b0b0fcf 48%,#0b0b0f82 100%);
+}
+.moments .moment-card:hover{border-color:#f33e5b;transform:translateY(-4px);box-shadow:0 16px 40px #0008}
+.moments .moment-card .moment-top,
+.moments .moment-card .moment-content,
+.moments .moment-card .moment-icon{position:relative;z-index:2}
+.moments .moment-card .moment-top{font-size:10px;letter-spacing:1.6px;color:#e9e7e9}
+.moments .moment-card .moment-content{max-width:100%;padding-right:15px}
+.moments .moment-card .moment-category{color:#d9d4d7;font-size:10px;letter-spacing:1.6px}
+.moments .moment-card .moment-content h3{
+  font-size:clamp(31px,2.8vw,43px);line-height:1.02;letter-spacing:-.055em;
+  color:#fff;margin-bottom:20px;text-shadow:0 5px 20px #0008;
+}
+.moments .moment-card .moment-button{color:#fff;border-color:#fff9}
+.moments .moment-card .moment-icon{
+  position:absolute;right:22px;top:22px;
+  width:56px;height:56px;display:grid;place-items:center;
+  background:#ffffff12;border:1px solid #ffffff36;border-radius:14px;
+  box-shadow:0 8px 26px #0006;
+}
+.moments .moment-card .moment-icon svg{display:block;width:26px;height:26px;stroke:#fff;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.moments .moment-fb .moment-icon svg{width:24px;height:24px;fill:#fff;stroke:none}
+.moments .moment-card .moment-watermark{z-index:0;opacity:.13}
+.moments .moment-card .ig-orb,.moments .moment-card .link-orb{z-index:0;opacity:.10}
+@media(min-width:651px) and (max-width:1050px){
+  .moments .moments-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .moments .moment-link{grid-column:1/-1;height:300px}
+}
+@media(min-width:651px) and (max-width:880px){
+  .hero-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+  .hero-copy{min-width:0}
+  .hero h1{font-size:clamp(38px,5.2vw,52px)}
+  .hero-meta{flex-wrap:wrap}
+}
+@media(max-width:650px){
+  .music-panel .genre-label{font-size:clamp(24px,7.2vw,32px);margin:24px 0 22px}
+  .moments .moments-grid{grid-template-columns:1fr;gap:13px}
+  .moments .moment-card,.moments .moment-link{grid-column:auto;height:285px;min-height:260px;padding:24px}
+  .moments .moment-card .moment-content h3{font-size:36px}
+  .moments .moment-card .moment-icon{width:49px;height:49px;top:18px;right:18px}
+  .moments .moment-card .moment-icon svg{width:24px;height:24px}
+}
+@media(max-width:360px){
+  .music-panel .genre-label{font-size:24px}
+  .moments .moment-card .moment-content h3{font-size:32px}
+}
+@media(prefers-reduced-motion:reduce){.moments .moment-card{transition:none}}
