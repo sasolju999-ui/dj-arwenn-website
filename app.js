@@ -13,6 +13,7 @@
       faq4Q:'Kako preverim prost termin?',faq4A:'Piši na Messenger ali pošlji povpraševanje z datumom in krajem dogodka. Odgovorim po preverjanju termina.',
       privacyLink:'ZASEBNOST',formOpenMail:'ODPRI E-POŠTO',formOpenMessenger:'MESSENGER',
       formRecover:'Oddaja ni bila potrjena. Podatki ostanejo v obrazcu; pošlji povpraševanje prek e-pošte ali Messengerja.',
+      turnstileSuccess:'Povpraševanje je bilo poslano. Odgovorim, ko preverim termin.',
       turnstileIntro:'HITRO VARNOSTNO PREVERJANJE',turnstileWait:'Varnostno preverjanje se še nalaga. Poskusi znova ali uporabi Messenger.',formSlowDown:'Preveč povpraševanj v kratkem času. Poskusi pozneje ali mi piši na Messenger.',formUnavailable:'Pošiljanje trenutno ni na voljo. Poskusi znova ali mi piši prek Messengerja.',
       captchaIntro:'ZAŠČITA PRED NEŽELENO POŠTO · Potrdi, da nisi robot.',captchaRequired:'Pred pošiljanjem prosim potrdi preverjanje »Nisem robot«.',captchaUnavailable:'Varnostnega preverjanja ni mogoče naložiti. Poskusi osvežiti stran ali mi piši prek Messengerja.',captchaRetry:'Povpraševanje ni bilo poslano. Po potrebi ponovno opravi preverjanje »Nisem robot« in poskusi znova.',formSending:'POŠILJANJE ...',formSuccess:'Povpraševanje je Web3Forms sprejel. Za dokončno potrditev preveri še, ali je sporočilo prispelo v nabiralnik.',
       formFailure:'Zunanja storitev se ni odzvala ali oddaje ni potrdila. Povpraševanja zato ne moremo šteti kot poslanega.',
@@ -42,6 +43,7 @@
       faq4Q:'How can I check availability?',faq4A:'Send a Messenger message or a booking enquiry with the event date and location. I will reply after checking availability.',
       privacyLink:'PRIVACY',formOpenMail:'OPEN EMAIL APP',formOpenMessenger:'MESSENGER',
       formRecover:'Submission could not be confirmed. Your details are still in the form. Please email your enquiry or use Messenger.',
+      turnstileSuccess:'Your enquiry was sent. I will reply after checking availability.',
       turnstileIntro:'QUICK SECURITY CHECK',turnstileWait:'Security verification is still loading. Please retry or use Messenger.',formSlowDown:'Too many enquiries. Please retry later or message me on Messenger.',formUnavailable:'Sending is currently unavailable. Please retry or contact me on Messenger.',
       captchaIntro:'SPAM PROTECTION · Please confirm you are not a robot.',captchaRequired:'Please complete the “I am human” check before sending.',captchaUnavailable:'The security check could not load. Please refresh the page or contact me via Messenger.',captchaRetry:'Your request was not sent. Please complete the captcha again if needed and retry.',formSending:'SENDING ...',formSuccess:'Web3Forms accepted your enquiry. I will confirm availability after receiving the email.',
       formFailure:'The external service was unavailable or did not confirm submission. We cannot mark your message as sent.',
@@ -233,7 +235,7 @@
           throw new Error('delivery_failed');
         }
         status.dataset.state = 'success';
-        status.textContent = strings[lang].formSuccess;
+        status.textContent = usingTurnstile ? strings[lang].turnstileSuccess : strings[lang].formSuccess;
         lastSuccessAt = Date.now();
         bookingForm.reset();
         if (captchaMode === 'turnstile') {
