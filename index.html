@@ -133,16 +133,9 @@
  <div class="field"><label for="client-phone" data-t="fieldPhone">TELEFON (NEOBVEZNO)</label><input id="client-phone" name="Telefon" type="tel" maxlength="40" autocomplete="tel" placeholder="+386 ..." data-t-placeholder="phonePlaceholder" /></div>
  <div class="field"><label for="event-type" data-t="fieldType">VRSTA DOGODKA</label><select id="event-type" name="Vrsta dogodka"><option value="Rojstni dan / zasebna zabava" data-t="typeParty">Rojstni dan / zasebna zabava</option><option value="Poroka" data-t="typeWedding">Poroka</option><option value="Poslovni dogodek" data-t="typeBusiness">Poslovni dogodek</option><option value="Klub / javna prireditev" data-t="typeClub">Klub / javna prireditev</option><option value="Drugo" data-t="typeOther">Drugo</option></select></div>
  <div class="field-row">
-  <div class="field calendar-field"><label for="event-date" data-t="fieldDate">DATUM</label>
+  <div class="field"><label for="event-date" data-t="fieldDate">DATUM</label>
   <input id="event-date" name="Datum dogodka" type="date" required />
-  <button class="calendar-trigger" id="calendar-trigger" type="button" aria-expanded="false" aria-controls="booking-calendar" hidden>Izberi datum dogodka <span aria-hidden="true">▦</span></button>
-  <div class="booking-calendar" id="booking-calendar" role="group" aria-label="Izbira datuma dogodka" hidden>
-   <div class="calendar-head"><button type="button" id="calendar-prev" aria-label="Prejšnji mesec">‹</button><strong id="calendar-month"></strong><button type="button" id="calendar-next" aria-label="Naslednji mesec">›</button></div>
-   <div class="calendar-weekdays" id="calendar-weekdays" aria-hidden="true"></div>
-   <div class="calendar-days" id="calendar-days"></div>
-   <p class="calendar-legend"><span aria-hidden="true">●</span> <span data-t="calendarLegend">Zasedeni datumi so označeni sivo.</span></p>
-  </div>
-  <p id="availability-note" class="availability-note" aria-live="polite" hidden></p>
+  <p class="date-discretion-note" data-t="dateDiscretion">Razpoložljivost termina preverim osebno in odgovorim na povpraševanje.</p>
  </div>
   <div class="field"><label for="event-location" data-t="fieldLocation">KRAJ DOGODKA</label><input id="event-location" name="Kraj dogodka" type="text" maxlength="80" placeholder="npr. Ptuj" data-t-placeholder="locationPlaceholder" required /></div>
  </div>
@@ -170,7 +163,6 @@
 <a href="mailto:sasolju999@gmail.com"  aria-label="Pošlji e-pošto" ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="m3 7 9 7 9-7"/></svg><span>E-POŠTA</span></a></nav></div>
  <div class="footer-bottom"><span>© <span id="year">2026</span> DJ ARWENN</span><span data-t="footerPrivacy">Brez analitičnih piškotkov · Kontaktni obrazec uporablja zunanjo storitev.</span><a class="privacy-footer-link" href="zasebnost.html" data-t="privacyLink">ZASEBNOST</a></div>
 </div></footer>
-  <script defer src="calendar.js"></script>
   <script defer src="app.js"></script>
 </body>
 </html>
