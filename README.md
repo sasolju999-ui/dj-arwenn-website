@@ -73,3 +73,14 @@ The admin form holds the token only in JS memory until the page closes or is loc
 
 **Important:** Do not reuse the existing `AVAILABILITY_HASH_SALT` as admin token. Newly received enquiries are not automatically marked as booked. The owner must explicitly confirm and mark each date.
 
+## Booking safety & manual recovery
+
+- The owner-only **PRENESI VARNOSTNO KOPIJO** button downloads a JSON snapshot of the complete `booked_dates` table including past dates. It does not include IP rate-limit counters, client information, or any secret.
+- Run a backup after every significant booking change, and keep it in a private folder. **Do not** upload JSON bookings to the public GitHub repo or share it via a public link.
+- No automatic backup schedule, remote file upload, or one-click restore is included. Confirm the file exists in Downloads after using the button.
+- A backup is **not** the same as a restore feature. To restore, use the private D1 console or Cloudflare D1's native backup/time-travel options (subject to plan and retention) and verify records before publishing. Do not paste or commit the private snapshot into public website files.
+- The admin page receives `Cache-Control: no-store`, anti-indexing, anti-framing, and a restrictive Content Security Policy.
+- Admin changes now require confirmation before a date is blocked or released.
+- Public enquiries remain delivered through Web3Forms. Its existing botcheck honeypot and service-side protection are not an assurance against all spam; adding Turnstile would need a server-side verified submission proxy and careful testing.
+- **Functional verification:** use a date you know is free, mark it booked in owner UI, verify the public lookup displays **TERMIN JE ŽE ZASEDEN**, release the date, verify **TERMIN JE PREDVIDOMA PROST**. Do not perform this test on actual confirmed bookings.
+
