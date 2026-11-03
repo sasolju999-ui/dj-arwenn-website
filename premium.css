@@ -458,3 +458,58 @@ h1 em,h2 em,.section h2 em,.contact h2 em{color:#f04761;font-style:normal}
   color:#635d62;
   margin:8px 0 0;
 }
+
+
+/* V9: discreet one-date availability check — public calendar stays hidden */
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.availability-check{
+  background:linear-gradient(135deg,#17171b,#1d161a);
+  color:#faf8f9;border:1px solid #ffffff20;
+  border-left:3px solid #ec2547;border-radius:10px;
+  padding:21px 21px 19px;margin:0 0 27px;
+  scroll-margin-top:95px;
+}
+.availability-kicker{font:850 10px/1.4 Inter,"Segoe UI",Arial,sans-serif;letter-spacing:.16em;color:#fa657d}
+.inquiry-card .availability-check h3{
+  font:850 clamp(18px,2vw,22px)/1.2 Inter,"Segoe UI",Arial,sans-serif!important;
+  color:#fff!important;letter-spacing:-.015em!important;margin:8px 0 9px!important;
+}
+.availability-check>p:not(.availability-result){
+  font:500 12px/1.7 Inter,"Segoe UI",Arial,sans-serif;
+  color:#c5bdc1;margin:0 0 17px;
+}
+.availability-controls{display:flex;align-items:stretch;gap:9px}
+.availability-controls input[type=date]{
+  min-width:0;max-width:100%;flex:1 1 48%;background:#fff!important;
+  border:1px solid #ccc5ca;border-radius:5px;color:#1d1a1c;
+  font:650 14px/1.3 Inter,"Segoe UI",Arial,sans-serif;padding:10px 11px;
+  min-height:48px;color-scheme:light;
+}
+.availability-controls button{
+  flex:0 0 auto;min-height:48px;border:1px solid #ea2a4a;
+  background:#d91437;color:#fff;border-radius:5px;padding:10px 15px;
+  font:850 10px/1.3 Inter,"Segoe UI",Arial,sans-serif;letter-spacing:.06em;
+  cursor:pointer;
+}
+.availability-controls button:hover:not(:disabled){background:#ee2b4e}
+.availability-controls button:disabled{opacity:.65;cursor:progress}
+.availability-controls input:focus-visible,.availability-controls button:focus-visible,.availability-continue:focus-visible{outline:3px solid #ff6a82;outline-offset:3px}
+.availability-result{
+  margin:15px 0 0;padding:12px 13px;background:#232126;
+  color:#e9dfe3;border:1px solid #5b4c53;border-radius:6px;
+  font:650 12px/1.6 Inter,"Segoe UI",Arial,sans-serif;
+}
+.availability-result[data-status=booked]{border-color:#b24159;color:#ffe1e6}
+.availability-result[data-status=enquiries_open]{border-color:#5d8b75;color:#dff6e9}
+.availability-continue{
+  display:inline-flex;align-items:center;gap:7px;margin-top:13px;
+  color:#fff!important;font:850 11px/1.5 Inter,"Segoe UI",Arial,sans-serif;
+  text-decoration:underline;text-underline-offset:4px;letter-spacing:.07em;
+}
+.availability-result[hidden],.availability-continue[hidden]{display:none!important}
+@media(max-width:760px){
+  .availability-check{padding:19px 16px 17px;margin-bottom:24px}
+  .availability-controls{flex-direction:column;align-items:stretch}
+  .availability-controls input[type=date]{flex:0 0 auto;width:100%}
+  .availability-controls button{width:100%}
+}
