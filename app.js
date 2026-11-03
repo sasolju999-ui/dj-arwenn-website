@@ -3,7 +3,7 @@
   'use strict';
   const strings = {
     sl: {
-      calendarLegend:'Zasedeni datumi so označeni sivo.',
+      dateDiscretion:'Razpoložljivost termina preverim osebno in odgovorim na povpraševanje.',
       heroArea:'⌖ OBMOČJE NASTOPOV: OD PREKMURJA DO CELJA',
       faqKicker:'DOBRO JE VEDETI',faqTitle:'PREDEN SE<br><em>DOGOVORIMO.</em>',
       faq1Q:'Kje nastopa DJ Arwenn?',faq1A:'Na dogodkih od Prekmurja do Celja. Za termin in lokacijo mi pošlji povpraševanje.',
@@ -30,7 +30,7 @@
       inquiryIntro:'Živjo, DJ Arwenn! Zanima me, ali si prost za naslednji dogodek:',inquiryType:'Vrsta dogodka',inquiryDate:'Datum',inquiryPlace:'Kraj',inquiryNotes:'Dodatne informacije',inquiryClosing:'Mi lahko sporočiš, ali imaš termin prost? Hvala!'
     },
     en: {
-      calendarLegend:'Booked dates are greyed out.',
+      dateDiscretion:'I will check the requested date personally and respond to your enquiry.',
       heroArea:'⌖ SERVICE AREA: FROM PREKMURJE TO CELJE',
       faqKicker:'GOOD TO KNOW',faqTitle:'BEFORE WE<br><em>PLAN YOUR EVENT.</em>',
       faq1Q:'Where does DJ Arwenn perform?',faq1A:'At events across the area from Prekmurje to Celje. Send the date and location to check availability.',
@@ -114,7 +114,6 @@
     bookingForm.addEventListener('submit', async (event) => {
       event.preventDefault();
       if (!bookingForm.reportValidity()) return;
-      if (window.DJArwennCalendar && !(await window.DJArwennCalendar.validate())) return;
       const formData = new FormData(bookingForm);
       if (formData.get('botcheck')) return;
       const controller = new AbortController();
@@ -137,7 +136,6 @@
         status.dataset.state = 'success';
         status.textContent = strings[lang].formSuccess;
         bookingForm.reset();
-        document.dispatchEvent(new Event('arwenn:booking-reset'));
       } catch (_error) {
         status.dataset.state = 'error';
         status.textContent = strings[lang].formFailure;
