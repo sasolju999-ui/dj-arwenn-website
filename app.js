@@ -3,6 +3,7 @@
   'use strict';
   const strings = {
     sl: {
+      availabilityKicker:'HITRO PREVERJANJE',availabilityTitle:'KDAJ NAČRTUJEŠ ZABAVO?',availabilityInfo:'Preveri svoj datum, brez javnega prikaza zasedenosti. Končni termin potrdim osebno.',availabilityDateLabel:'DATUM DOGODKA',availabilityAction:'PREVERI TERMIN',availabilityContinue:'POŠLJI POVPRAŠEVANJE →',formBooked:'Za izbrani datum trenutno ne sprejemam novih rezervacij. Izberi drug datum ali mi piši na Messenger.',
       dateDiscretion:'Razpoložljivost termina preverim osebno in odgovorim na povpraševanje.',
       heroArea:'⌖ OBMOČJE NASTOPOV: OD PREKMURJA DO CELJA',
       faqKicker:'DOBRO JE VEDETI',faqTitle:'PREDEN SE<br><em>DOGOVORIMO.</em>',
@@ -30,6 +31,7 @@
       inquiryIntro:'Živjo, DJ Arwenn! Zanima me, ali si prost za naslednji dogodek:',inquiryType:'Vrsta dogodka',inquiryDate:'Datum',inquiryPlace:'Kraj',inquiryNotes:'Dodatne informacije',inquiryClosing:'Mi lahko sporočiš, ali imaš termin prost? Hvala!'
     },
     en: {
+      availabilityKicker:'QUICK DATE CHECK',availabilityTitle:'WHEN IS YOUR EVENT?',availabilityInfo:'Check your date privately, without a public booking calendar. I will confirm the final booking personally.',availabilityDateLabel:'EVENT DATE',availabilityAction:'CHECK DATE',availabilityContinue:'SEND AN ENQUIRY →',formBooked:'I am not taking new bookings for that date. Please choose another or message me on Messenger.',
       dateDiscretion:'I will check the requested date personally and respond to your enquiry.',
       heroArea:'⌖ SERVICE AREA: FROM PREKMURJE TO CELJE',
       faqKicker:'GOOD TO KNOW',faqTitle:'BEFORE WE<br><em>PLAN YOUR EVENT.</em>',
@@ -113,7 +115,18 @@
     };
     bookingForm.addEventListener('submit', async (event) => {
       event.preventDefault();
-      if (!bookingForm.reportValidity()) return;
+      if (submitButton.disabled || !bookingForm.reportValidity()) return;
+      submitButton.disabled = true;
+      if (window.DJArwennAvailability && choose('event-date')?.value) {
+        const statusOfDate = await window.DJArwennAvailability.lookup(choose('event-date').value);
+        if (statusOfDate === 'booked') {
+          status.hidden = false;
+          status.dataset.state = 'error';
+          status.textContent = strings[lang].formBooked;
+          submitButton.disabled = false;
+          return;
+        }
+      }
       const formData = new FormData(bookingForm);
       if (formData.get('botcheck')) return;
       const controller = new AbortController();
