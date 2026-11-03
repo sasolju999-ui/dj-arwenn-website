@@ -413,3 +413,41 @@ h1 em,h2 em,.section h2 em,.contact h2 em{color:#f04761;font-style:normal}
 @media(max-width:360px){
   .moments .moment-card .moment-content h3{font-size:28px}
 }
+
+
+/* V7: service area, booking resilience, FAQ, and privacy UI */
+.service-area{
+  display:inline-flex;align-items:center;gap:8px;
+  max-width:100%;margin:0 0 18px;
+  border:1px solid #ffffff35;border-left:3px solid #e72647;
+  border-radius:4px;padding:10px 14px;
+  font:800 10px/1.6 Inter,"Segoe UI",Arial,sans-serif;
+  color:#f4edef;letter-spacing:.11em;
+  background:#111216c4;
+}
+.service-area span{font-size:18px;color:#f33e5d;line-height:1}
+.dj-faq{background:linear-gradient(130deg,#101113,#161217);padding:92px 0}
+.dj-faq h2{margin:20px 0 30px!important;font-size:clamp(38px,5.5vw,66px)!important}
+.faq-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.faq-grid details{border:1px solid #ffffff28;background:#ffffff06;border-radius:9px;padding:20px 23px}
+.faq-grid details[open]{border-color:#df3150;background:#211418}
+.faq-grid summary{position:relative;cursor:pointer;color:#fff;font-size:15px;font-weight:800;line-height:1.4;padding-right:22px}
+.faq-grid summary:focus-visible{outline:2px solid #ff526b;outline-offset:5px}
+.faq-grid details p{font-size:14px;line-height:1.75;color:#d0c9cd;margin:14px 0 0}
+.inquiry-consent a{color:#9b1231;text-decoration:underline;text-underline-offset:3px;font-weight:750}
+.form-status{margin-top:16px;padding:14px 15px;border-radius:7px;font-size:13px;font-weight:750;line-height:1.55;background:#f5e8ed;color:#3d1620;border:1px solid #d6a2b0}
+.form-status[data-state="success"]{background:#e2f5e9;border-color:#a4d4b4;color:#17603a}
+.form-status[data-state="loading"]{background:#f0eff3;border-color:#ccc5d2;color:#403747}
+.form-status[hidden],.form-recovery[hidden]{display:none!important}
+.form-recovery{margin-top:13px;padding:15px;border:1px solid #c89ca7;background:#fbedf1;border-radius:8px;color:#40222a}
+.form-recovery p{font-size:13px;line-height:1.65;margin:0 0 13px}
+.form-recovery-actions{display:flex;gap:9px;flex-wrap:wrap}
+.fallback-button{display:inline-flex;align-items:center;justify-content:center;background:#bf1636;color:#fff!important;border:1px solid #bf1636;border-radius:5px;padding:13px 16px;font-size:11px;font-weight:850;text-decoration:none;letter-spacing:.04em}
+.fallback-secondary{background:#202126;border-color:#202126}
+.form-submit:disabled{opacity:.7;cursor:progress;transform:none}
+.privacy-footer-link{color:#ef5770!important;text-decoration:underline;text-underline-offset:4px;font-size:10px;font-weight:800;letter-spacing:1px}
+@media(max-width:760px){.faq-grid{grid-template-columns:1fr}.dj-faq{padding:69px 0}.faq-grid details{padding:19px}.service-area{font-size:9px;margin-bottom:15px;letter-spacing:.07em}}
+@media(max-width:650px){
+  .mobile-book{padding:13px 20px!important;min-height:58px!important;font-size:11px!important;letter-spacing:.1em}
+  .footer{padding-bottom:84px}
+}
