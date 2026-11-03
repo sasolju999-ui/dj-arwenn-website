@@ -631,3 +631,13 @@ h1 em,h2 em,.section h2 em,.contact h2 em{color:#f04761;font-style:normal}
 @media(max-width:390px){
   .inquiry-card .inquiry-captcha{padding:12px 8px}
 }
+
+/* Optional Cloudflare Turnstile widget in the existing booking form. */
+.inquiry-card .inquiry-captcha .h-captcha[hidden]{display:none!important}
+.inquiry-card .inquiry-captcha .turnstile-widget{
+  max-width:100%;
+  min-height:65px;
+}
+.inquiry-card .inquiry-captcha .turnstile-widget iframe{
+  max-width:100%;
+}
