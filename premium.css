@@ -289,3 +289,41 @@ h1 em,h2 em,.section h2 em,.contact h2 em{color:#f04761;font-style:normal}
   .moments .moment-card .moment-content h3{font-size:32px}
 }
 @media(prefers-reduced-motion:reduce){.moments .moment-card{transition:none}}
+
+
+/* Premium V4 — photograph badge anchored to the exact bottom/right of portrait,
+   and heading constrained to its own column (never over the photo). */
+.hero-grid{grid-template-columns:minmax(0,1.02fr) minmax(0,.98fr);column-gap:clamp(28px,4vw,64px)}
+.hero-copy{min-width:0;max-width:100%;position:relative;z-index:1}
+.hero h1,html[lang=en] .hero h1{
+  font-size:clamp(42px,5vw,72px);
+  line-height:1.015;letter-spacing:-.067em;
+  max-width:100%;overflow-wrap:normal;
+}
+.hero-art{min-width:0}
+.hero-art .portrait-disc{position:absolute;isolation:isolate}
+.hero-art .portrait-disc .live-pill{
+  position:absolute;z-index:8;bottom:0!important;right:0!important;left:auto!important;top:auto!important;
+  margin:0;transform:none;max-width:calc(100% - 8px);
+  border-radius:7px 0 7px 0;
+  display:inline-flex;align-items:center;justify-content:center;
+  white-space:nowrap;pointer-events:none;
+  background:#101114ec;border-color:#ffffff88;
+  box-shadow:0 0 0 1px #0006;
+}
+/* Use a stacked layout for narrow tablets rather than squeezing two columns. */
+@media(min-width:651px) and (max-width:980px){
+  .hero-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:18px;min-height:0;padding-top:34px;padding-bottom:30px}
+  .hero-copy{padding:32px 0 0;max-width:100%}
+  .hero h1,html[lang=en] .hero h1{font-size:clamp(50px,7.1vw,69px)}
+  .hero-art{position:relative!important;left:auto!important;right:auto!important;bottom:auto!important;
+    margin:0 auto!important;min-width:0!important;width:min(100%,520px)!important;
+    height:505px!important;transform:none!important;align-self:center}
+  .hero-art .portrait-disc{inset:0!important;width:100%!important;max-width:100%!important;height:100%!important}
+  .hero{min-height:0}
+}
+@media(max-width:650px){
+  .hero-grid{column-gap:0}
+  .hero h1,html[lang=en] .hero h1{font-size:clamp(36px,10.5vw,55px);max-width:100%}
+  .hero-art .portrait-disc .live-pill{font-size:9px;padding:11px 12px;border-radius:6px 0 6px 0}
+}
