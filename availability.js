@@ -97,5 +97,13 @@
   const fields = Object.fromEntries(nowParts.map(part => [part.type, part.value]));
   dateInput.min = fields.year + '-' + fields.month + '-' + fields.day;
   formDate.min = dateInput.min;
+  // On small screens the fixed CTA must not cover the booking form.
+  const bookingCard = box.closest('.inquiry-card');
+  if (bookingCard && 'IntersectionObserver' in window) {
+    const visibility = new IntersectionObserver(entries => {
+      document.body.classList.toggle('booking-in-view', entries[0].isIntersecting);
+    }, { threshold: 0, rootMargin: '0px 0px -55px 0px' });
+    visibility.observe(bookingCard);
+  }
   window.DJArwennAvailability = { lookup };
 })();
