@@ -103,6 +103,7 @@ document.addEventListener('arwenn:languagechanged',()=>{updateLabel();render();}
 document.addEventListener('arwenn:booking-reset',()=>{input.value='';updateLabel();render();});
 document.documentElement.classList.add('calendar-enhanced');
 toggle.hidden=false;input.tabIndex=-1;input.required=false;
+const label=document.querySelector('label[for="event-date"]');if(label)label.htmlFor='calendar-trigger';
 updateLabel();render();refresh();
 window.DJArwennCalendar={
   async validate(){
