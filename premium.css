@@ -327,3 +327,49 @@ h1 em,h2 em,.section h2 em,.contact h2 em{color:#f04761;font-style:normal}
   .hero h1,html[lang=en] .hero h1{font-size:clamp(36px,10.5vw,55px);max-width:100%}
   .hero-art .portrait-disc .live-pill{font-size:9px;padding:11px 12px;border-radius:6px 0 6px 0}
 }
+
+
+/* Premium V5: cleaner Moments cards — large background marks only. */
+.moments .moment-card .moment-icon{display:none!important}
+.moments .moment-card .moment-top,
+.moments .moment-card .moment-content{position:relative;z-index:2}
+.moments .moment-card .moment-content{
+  max-width:78%;
+  margin-top:auto;
+  padding-right:0;
+}
+.moments .moment-card .moment-category{color:#f2edf0}
+.moments .moment-card .moment-content h3{
+  font-size:clamp(29px,2.5vw,43px);
+  line-height:1.075;
+  letter-spacing:-.04em;
+  max-width:12ch;
+  text-wrap:balance;
+  overflow-wrap:normal;
+  word-break:normal;
+  text-shadow:0 3px 12px #000b;
+}
+.moments .moment-card .moment-watermark{
+  right:-5px;top:58px;z-index:0;
+  font-size:300px;color:#ffffff8c;opacity:.43;
+  transform:rotate(-8deg);
+}
+.moments .moment-card .ig-orb{
+  z-index:0;top:60px;right:-48px;width:255px;height:255px;
+  border:35px solid #ffffff4a;
+  opacity:.78;filter:none;
+  transform:rotate(-16deg);
+}
+.moments .moment-card .ig-orb:before{inset:53px;border:17px solid #ffffff57}
+.moments .moment-card .link-orb{
+  z-index:0;top:62px;right:-7px;
+  font-size:220px;color:#ffffff82;opacity:.6;filter:none;
+}
+@media(max-width:650px){
+  .moments .moment-card .moment-content{max-width:79%}
+  .moments .moment-card .moment-content h3{font-size:clamp(31px,8.3vw,36px);max-width:11ch}
+  .moments .moment-card .moment-watermark{font-size:255px;right:-12px}
+}
+@media(max-width:360px){
+  .moments .moment-card .moment-content h3{font-size:30px}
+}
