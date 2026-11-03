@@ -513,3 +513,29 @@ h1 em,h2 em,.section h2 em,.contact h2 em{color:#f04761;font-style:normal}
   .availability-controls input[type=date]{flex:0 0 auto;width:100%}
   .availability-controls button{width:100%}
 }
+
+/* Booking feedback and unobstructed mobile form (2026-11). */
+.availability-result[data-status=booked] {
+  border-color:#f06479;
+  background:#3a1b26;
+  color:#fff0f2;
+}
+.availability-result[data-status=enquiries_open] {
+  border-color:#7cb69a;
+  background:#19362c;
+  color:#e8fff3;
+}
+.availability-result[data-status=rate_limited] {
+  border-color:#d4ac65;
+  background:#3b3020;
+  color:#fff3d7;
+}
+.availability-result {overflow-wrap:anywhere}
+@media(max-width:650px) {
+  body.booking-in-view .mobile-book {display:none!important}
+  body.booking-in-view {padding-bottom:0}
+  .availability-check {scroll-margin-top:22px}
+  .availability-result {font-size:13px;line-height:1.6}
+  .availability-controls button {min-height:51px}
+  #inquiry-form {scroll-margin-top:20px}
+}

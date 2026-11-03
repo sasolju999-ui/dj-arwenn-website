@@ -1,4 +1,4 @@
-/* DJ Arwenn — one-date check, no public availability calendar or booking list. */
+/* DJ Arwenn — private single-date availability check. Never guess that a date is available. */
 (() => {
   'use strict';
   const get = id => document.getElementById(id);
@@ -9,33 +9,36 @@
   const continueLink = get('availability-continue');
   const formDate = get('event-date');
   if (!box || !dateInput || !action || !result || !continueLink || !formDate) return;
+
   const english = () => document.documentElement.lang === 'en';
-  const translated = (sl, en) => english() ? en : sl;
-  const cache = new Map();
-  const results = {
-    booked: [
-      'Za izbrani datum trenutno ne sprejemam novih rezervacij. Izberi drug datum.',
-      'I am not taking new bookings for this date. Please choose another date.'
-    ],
-    enquiries_open: [
-      'Za ta datum sprejemam povpraševanja. Pošlji mi podatke o dogodku; termin dokončno potrdim osebno.',
-      'I am accepting enquiries for this date. Tell me about your event; I will confirm the booking personally.'
-    ],
-    unknown: [
-      'Zasedenosti trenutno ne morem samodejno preveriti. Pošlji povpraševanje in termin ti osebno potrdim.',
-      'Automatic availability is temporarily unavailable. Send an enquiry and I will confirm the date personally.'
-    ],
+  const messages = {
+    booked: ['TERMIN JE ŽE ZASEDEN. Za ta datum ne sprejemam novih rezervacij. Izberi drug datum.', 'DATE ALREADY BOOKED. I am not accepting new bookings for this date. Please choose another date.'],
+    enquiries_open: ['TERMIN JE PREDVIDOMA PROST. Za ta datum sprejemam povpraševanja. Rezervacijo dokončno potrdim osebno.', 'DATE APPEARS AVAILABLE. I am accepting enquiries for this date. I will confirm the booking personally.'],
+    unknown: ['Termina trenutno ni mogoče samodejno preveriti. Pošlji povpraševanje in odgovorim osebno.', 'Automatic date checking is currently unavailable. Send an enquiry and I will reply personally.'],
+    rate_limited: ['Preveč preverjanj v kratkem času. Poskusi pozneje ali pošlji povpraševanje.', 'Too many date checks. Please try again later or send an enquiry.'],
     loading: ['PREVERJAM ...', 'CHECKING ...'],
     button: ['PREVERI TERMIN', 'CHECK DATE']
   };
-  const labels = key => results[key][english() ? 1 : 0];
-  function show(status) {
+  const label = key => messages[key][english() ? 1 : 0];
+  const cache = new Map();
+  let requestNumber = 0;
+
+  function reset() {
+    requestNumber++;
+    result.hidden = true;
+    continueLink.hidden = true;
+    action.disabled = false;
+    action.textContent = label('button');
+  }
+
+  function show(status, selectedDate) {
     result.hidden = false;
     result.dataset.status = status;
-    result.textContent = labels(status);
+    result.textContent = label(status);
     continueLink.hidden = status === 'booked';
-    if (status !== 'booked' && dateInput.value) formDate.value = dateInput.value;
+    if (status !== 'booked' && selectedDate) formDate.value = selectedDate;
   }
+
   async function lookup(date) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return 'unknown';
     const saved = cache.get(date);
@@ -50,51 +53,57 @@
         cache: 'no-store',
         signal: controller.signal
       });
-      if (!response.ok) return 'unknown';
-      const body = await response.json();
-      const status = body?.status;
-      if (status !== 'booked' && status !== 'enquiries_open') return 'unknown';
-      cache.set(date, { status, until: Date.now() + 45 * 1000 });
-      return status;
+      const payload = await response.json().catch(() => null);
+      if (response.status === 429 || payload?.reason === 'rate_limited') return 'rate_limited';
+      if (!response.ok || !payload) return 'unknown';
+      if (payload.status !== 'booked' && payload.status !== 'enquiries_open') return 'unknown';
+      cache.set(date, { status: payload.status, until: Date.now() + 45000 });
+      return payload.status;
     } catch (_) {
       return 'unknown';
     } finally {
       clearTimeout(timeout);
     }
   }
+
   async function check() {
-    if (action.disabled) return;
-    if (!dateInput.reportValidity()) return;
+    if (action.disabled || !dateInput.reportValidity()) return;
+    const chosen = dateInput.value;
+    const id = ++requestNumber;
     action.disabled = true;
-    action.textContent = labels('loading');
+    action.textContent = label('loading');
     result.hidden = true;
     continueLink.hidden = true;
     try {
-      show(await lookup(dateInput.value));
+      const status = await lookup(chosen);
+      if (id === requestNumber && dateInput.value === chosen) show(status, chosen);
     } finally {
-      action.disabled = false;
-      action.textContent = labels('button');
+      if (id === requestNumber) {
+        action.disabled = false;
+        action.textContent = label('button');
+      }
     }
   }
-  dateInput.addEventListener('change', () => {
-    result.hidden = true;
-    continueLink.hidden = true;
-  });
+
+  dateInput.addEventListener('change', reset);
+  dateInput.addEventListener('input', reset);
   action.addEventListener('click', check);
-  continueLink.addEventListener('click', () => {
-    formDate.value = dateInput.value;
-  });
+  continueLink.addEventListener('click', () => { formDate.value = dateInput.value; });
   document.addEventListener('arwenn:languagechanged', () => {
-    action.textContent = labels('button');
-    if (!result.hidden && ['booked','enquiries_open','unknown'].includes(result.dataset.status)) {
-      result.textContent = labels(result.dataset.status);
-    }
+    if (!action.disabled) action.textContent = label('button');
+    if (!result.hidden && messages[result.dataset.status]) result.textContent = label(result.dataset.status);
   });
-  const min = new Date();
-  const y = min.getFullYear(), m = String(min.getMonth() + 1).padStart(2, '0');
-  const d = String(min.getDate()).padStart(2, '0');
-  dateInput.min = [y,m,d].join('-');
-  // Always fall back to the normal enquiry flow if the private backend
-  // is not connected, unavailable, or the visitor hits their rate limit.
+  const nowParts = new Intl.DateTimeFormat('en-CA', {year:'numeric', month:'2-digit', day:'2-digit', timeZone:'Europe/Ljubljana'}).formatToParts(new Date());
+  const fields = Object.fromEntries(nowParts.map(part => [part.type, part.value]));
+  dateInput.min = fields.year + '-' + fields.month + '-' + fields.day;
+  formDate.min = dateInput.min;
+  // On small screens the fixed CTA must not cover the booking form.
+  const bookingCard = box.closest('.inquiry-card');
+  if (bookingCard && 'IntersectionObserver' in window) {
+    const visibility = new IntersectionObserver(entries => {
+      document.body.classList.toggle('booking-in-view', entries[0].isIntersecting);
+    }, { threshold: 0, rootMargin: '0px 0px -55px 0px' });
+    visibility.observe(bookingCard);
+  }
   window.DJArwennAvailability = { lookup };
 })();
