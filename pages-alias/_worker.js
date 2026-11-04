@@ -11,6 +11,23 @@
  */
 export default {
   async fetch(request, env) {
+    // Serve the exact Google Search Console proof on the canonical Pages
+    // hostname. Advanced-mode Pages Workers otherwise forward this path
+    // to the origin Worker, where the Pages-only file does not exist.
+    const url = new URL(request.url);
+    if (url.hostname === "djarwenn.pages.dev" &&
+        url.pathname === "/googlefdb7c6d26ac3df0f.html" &&
+        (request.method === "GET" || request.method === "HEAD")) {
+      return new Response(request.method === "HEAD" ? null :
+        "google-site-verification: googlefdb7c6d26ac3df0f.html\n", {
+        status: 200,
+        headers: {
+          "Content-Type": "text/html; charset=utf-8",
+          "Cache-Control": "public, max-age=300",
+          "X-Content-Type-Options": "nosniff"
+        }
+      });
+    }
     if (!env.DJ_ARWENN_ORIGIN || typeof env.DJ_ARWENN_ORIGIN.fetch !== "function") {
       return new Response("DJ Arwenn short website is not connected yet.", {
         status: 503,
