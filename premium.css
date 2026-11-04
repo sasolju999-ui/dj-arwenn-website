@@ -722,3 +722,195 @@ html{scroll-padding-top:88px}
  .mobile-book .mobile-book-action{font-size:9px;gap:7px;padding:10px}
 }
 @media(prefers-reduced-motion:reduce){.teaser-bars i{animation:none!important}}
+
+
+/* DJ Arwenn mobile refinement: real brand imagery, compact editorial panels and dark booking UI. */
+.inquiry-card{
+  background:linear-gradient(155deg,#1c1d22 0%,#15161a 65%,#171318 100%)!important;
+  color:#f8f5f7!important;
+  border:1px solid #ffffff2c!important;
+  box-shadow:0 28px 70px #0008!important;
+  color-scheme:dark;
+}
+.inquiry-card .inquiry-head h3{color:#fff!important}
+.inquiry-card .inquiry-label{color:#fa738e}
+.inquiry-card .inquiry-icon{color:#ef5371}
+.inquiry-card .form-help{color:#c7bec4}
+.inquiry-card .field label{color:#f0e7ec}
+.inquiry-card .field input,
+.inquiry-card .field select,
+.inquiry-card .field textarea,
+.inquiry-card .message-result textarea{
+  background:#24252b!important;color:#fff!important;border:1px solid #66606a!important;
+  border-radius:7px;color-scheme:dark;box-shadow:none;
+}
+.inquiry-card .field input::placeholder,
+.inquiry-card .field textarea::placeholder{color:#a9a2aa}
+.inquiry-card .field input:focus-visible,
+.inquiry-card .field select:focus-visible,
+.inquiry-card .field textarea:focus-visible{outline:2px solid #f35b77;outline-offset:2px;border-color:#f35b77!important}
+.inquiry-card .field input:-webkit-autofill,
+.inquiry-card .field input:-webkit-autofill:hover,
+.inquiry-card .field input:-webkit-autofill:focus{
+  -webkit-text-fill-color:#fff!important;
+  -webkit-box-shadow:0 0 0 1000px #24252b inset!important;
+  caret-color:#fff!important;
+}
+.inquiry-card .inquiry-consent{
+  background:#222126!important;color:#eee8ec!important;border:1px solid #625761!important;
+}
+.inquiry-card .inquiry-consent a{color:#ff8198!important}
+.inquiry-card .inquiry-captcha{
+  background:#222126!important;border:1px solid #61565e!important;
+}
+.inquiry-card .inquiry-captcha-label{color:#f1e9ed!important}
+.inquiry-card .form-help.form-service-note{color:#b8aeb4!important}
+.inquiry-card .form-recovery{background:#302029;color:#f2e9ec;border-color:#98526a}
+.inquiry-card .form-recovery p{color:#f1e8ed}
+.inquiry-card .form-status{background:#2c232b;color:#f8e8ef;border-color:#89516a}
+.inquiry-card .form-status[data-state="loading"]{background:#28272e;color:#f5eff4;border-color:#645e69}
+.inquiry-card .form-status[data-state="success"]{background:#1f352c;color:#ddffea;border-color:#5caa84}
+.inquiry-card .message-result{border-color:#54464f}
+.inquiry-card .availability-check{background:#19191e}
+.inquiry-card .availability-controls input[type=date]{
+  background:#28272d!important;color:#fff!important;border-color:#69616a!important;color-scheme:dark;
+}
+.inquiry-card .availability-controls input[type=date]:focus-visible{outline:2px solid #fc748c;outline-offset:2px}
+
+/* Bold artwork in event tiles, without invented real-event photos. */
+.services-grid .service-card{
+  display:flex;flex-direction:column;justify-content:flex-start;gap:0;
+  min-height:255px;position:relative;isolation:isolate;overflow:hidden;
+  padding:24px;
+  border:1px solid #ffffff2f;border-radius:12px;
+  background:linear-gradient(125deg,#21181d,#15161a 75%);
+}
+.services-grid .service-card:before{
+  display:block;content:"";position:absolute;inset:-10% -20% auto auto;width:80%;height:80%;
+  border-radius:50%;filter:blur(2px);pointer-events:none;z-index:-1;
+  background:radial-gradient(circle,#cf385041 0%,#e02a3e12 48%,transparent 68%);
+}
+.services-grid .service-card:after{
+  content:"";position:absolute;right:18px;top:30px;width:105px;height:105px;
+  border-radius:50%;border:1px solid #ffffff23;box-shadow:0 0 0 16px #ffffff08,0 0 0 40px #ffffff05;
+  z-index:-1;pointer-events:none;
+}
+.services-grid .service-card .card-top{display:flex;justify-content:flex-end;align-items:center;min-height:72px;margin:0 0 22px}
+.services-grid .service-card .card-top svg{
+  width:74px;height:74px;color:#f1a0b0;opacity:.88;
+  filter:drop-shadow(0 5px 18px #f53b5d47);
+}
+.services-grid .service-card>div:last-child{position:relative;z-index:2;margin-top:auto;max-width:95%}
+.services-grid .service-card h3{font-size:clamp(22px,2.3vw,28px);margin:0 0 9px;line-height:1.15}
+.services-grid .service-card p{font-size:13px;line-height:1.6;min-height:0;color:#d3c9ce}
+.services-grid .service-wedding{background:radial-gradient(ellipse at 95% 5%,#582f45 0%,transparent 58%),linear-gradient(125deg,#201b23,#141519)}
+.services-grid .service-wedding:after{border-color:#f7c1cd50;transform:rotate(-17deg);border-radius:50%}
+.services-grid .service-birthday{background:radial-gradient(ellipse at 100% 10%,#6d2035 0%,transparent 60%),linear-gradient(125deg,#23171d,#141519)}
+.services-grid .service-birthday:after{border:2px dashed #f2738950;box-shadow:0 0 0 16px #e6385311,0 0 0 42px #ff637807}
+.services-grid .service-business{background:linear-gradient(135deg,#25212a,#13161b)}
+.services-grid .service-business:after{border-radius:14px;transform:rotate(15deg);border-color:#b3c0d550}
+.services-grid .service-club{background:radial-gradient(ellipse at 93% 7%,#5e1437 0%,transparent 65%),linear-gradient(130deg,#17141d,#0e1117)}
+.services-grid .service-club:after{border:2px solid #ef4d8759;box-shadow:0 0 0 13px #e5306517,0 0 0 32px #a642b90b}
+
+/* Restore real platform icons previously hidden by a legacy !important rule. */
+.moments .moment-card .moment-icon{
+  display:grid!important;
+  position:absolute;top:18px;right:18px;z-index:4;
+  width:44px;height:44px;background:#ffffff0d;border:1px solid #ffffff38;
+  border-radius:10px;place-items:center;
+}
+.moments .moment-card .moment-icon svg{width:23px;height:23px}
+.moments .moments-grid{gap:13px;margin-top:25px}
+.moments .moment-card,.moments .moment-link{
+  height:auto!important;min-height:208px!important;padding:23px!important;
+  justify-content:flex-start!important;gap:0;
+}
+.moments .moment-card .moment-top{font-size:11px;letter-spacing:.13em;margin:7px 50px 16px 0}
+.moments .moment-card .moment-content{margin-top:auto;max-width:100%;z-index:3}
+.moments .moment-card .moment-category{font-size:9px;letter-spacing:.11em;margin-bottom:8px}
+.moments .moment-card .moment-content h3{
+  font-size:clamp(22px,2.2vw,28px)!important;line-height:1.13!important;
+  max-width:72%!important;margin-bottom:13px!important;text-wrap:balance;
+}
+.moments .moment-card .moment-button{font-size:10px;padding-bottom:5px}
+.moments .moment-card .moment-watermark{font-size:185px;top:0;right:0;opacity:.2}
+.moments .moment-card .ig-orb{width:170px;height:170px;top:23px;right:-22px;border-width:26px;opacity:.48}
+.moments .moment-card .ig-orb:before{inset:32px;border-width:13px}
+.moments .moment-card .link-orb{font-size:160px;top:40px;right:0;opacity:.5}
+
+/* Native disclosure keeps the approved full story intact, without page-long initial scrolling. */
+.about-expand{max-width:67ch;margin:8px 0 0}
+.about-read-more{
+  display:inline-flex;align-items:center;gap:16px;cursor:pointer;list-style:none;
+  color:#fff;background:#2a1b23;border:1px solid #b83b56;
+  border-radius:7px;min-height:48px;padding:11px 18px;
+  font-size:11px;font-weight:900;letter-spacing:.08em;
+}
+.about-read-more::-webkit-details-marker{display:none}
+.about-read-more:hover{background:#38202b}
+.about-read-more:focus-visible{outline:3px solid #fd748d;outline-offset:3px}
+.about-read-more .hide-label,.about-expand[open] .show-label{display:none}
+.about-expand[open] .hide-label{display:inline}
+.about-chevron{font-size:22px;line-height:1;transition:transform .2s}
+.about-expand[open] .about-chevron{transform:rotate(180deg)}
+.about-extra{padding:24px 0 0}
+.about-extra>p{color:#bdb9be;font-size:15px;line-height:1.87;margin:0 0 18px}
+.about-extra .about-emphasis{color:#fff;font-weight:850;font-size:clamp(18px,2vw,24px);line-height:1.4;margin:24px 0 16px}
+.about-extra .about-signature{color:#f6617a;font-size:15px;font-weight:850;letter-spacing:.02em}
+.about-extra .about-quote{margin:13px 0 18px}
+
+/* Small turntable/cassette details extend the vinyl story without dominating it. */
+.about-record-scene{isolation:isolate}
+.about-record{z-index:1}
+.turntable-tonearm{
+  position:absolute;top:9%;right:8%;width:20px;height:39%;z-index:2;
+  border-radius:12px;background:linear-gradient(90deg,#4a4b53,#d1cbd0 45%,#484851);
+  box-shadow:0 0 0 5px #25242a,0 6px 20px #000a;transform:rotate(28deg);
+  transform-origin:50% 8%;
+}
+.turntable-tonearm:before{content:"";position:absolute;top:-8px;left:-10px;width:39px;height:39px;border-radius:50%;background:radial-gradient(circle,#6c6871 0 27%,#d2cbd0 32% 44%,#272830 49%);box-shadow:0 5px 18px #000b}
+.turntable-tonearm span{position:absolute;left:-3px;bottom:-9px;width:26px;height:24px;background:linear-gradient(135deg,#beb8bd,#39363d);clip-path:polygon(0 0,100% 0,74% 100%,27% 100%);box-shadow:0 5px 12px #0009}
+.retro-cassette{
+  position:absolute;left:5%;bottom:24%;width:124px;height:75px;z-index:3;
+  transform:rotate(-13deg);border:2px solid #74636d;border-radius:9px;
+  background:linear-gradient(170deg,#413842 0 28%,#bdb1ad 29% 69%,#30272d 70%);
+  box-shadow:0 7px 23px #000c, inset 0 0 0 4px #18161b;
+}
+.cassette-window{display:flex;justify-content:space-evenly;align-items:center;gap:13px;position:absolute;left:17px;right:17px;top:26px;height:28px;background:#1c1d24;border-radius:6px;border:1px solid #857c85}
+.cassette-window span{display:block;width:17px;height:17px;border:4px dotted #b7acb3;background:#42414a;border-radius:50%}
+.cassette-line{position:absolute;left:13px;right:13px;top:14px;height:4px;background:#ec526c;border-radius:2px}
+.record-bottom{z-index:5}
+
+/* Tidy up mobile hierarchy without changing contact or booking logic. */
+@media(max-width:650px){
+  .section{padding-top:66px;padding-bottom:70px}
+  .services-grid{margin-top:29px;gap:12px}
+  .services-grid .service-card{min-height:180px!important;padding:19px 19px 20px!important}
+  .services-grid .service-card .card-top{min-height:51px;margin:0 0 10px}
+  .services-grid .service-card .card-top svg{width:55px;height:55px}
+  .services-grid .service-card:after{width:88px;height:88px;top:23px}
+  .services-grid .service-card h3{font-size:24px}
+  .services-grid .service-card p{font-size:12px;line-height:1.55;max-width:33ch}
+  .moments .moment-card,.moments .moment-link{min-height:190px!important;padding:19px 20px!important}
+  .moments .moment-card .moment-top{margin:0 55px 14px 0}
+  .moments .moment-card .moment-content h3{font-size:clamp(21px,6vw,26px)!important;max-width:80%!important;margin-bottom:12px!important}
+  .moments .moment-card .moment-icon{width:41px;height:41px;top:16px;right:16px}
+  .moments .moment-card .moment-icon svg{width:21px;height:21px}
+  .about-extra>p{font-size:14px;line-height:1.78}
+  .turntable-tonearm{width:14px;top:10%;right:10%;height:34%}
+  .turntable-tonearm:before{width:29px;height:29px;left:-8px}
+  .retro-cassette{width:101px;height:62px;left:4%;bottom:25%}
+  .cassette-window{top:23px;left:12px;right:12px;height:21px}
+  .cassette-window span{width:15px;height:15px;border-width:3px}
+  .cassette-line{top:13px}
+  .music-direction{gap:10px}
+  .mobile-book{min-height:55px!important;padding:8px 13px!important}
+  .mobile-book .mobile-book-brand img{max-width:77px;height:29px}
+  .mobile-book .mobile-book-action{font-size:9px;padding:10px 11px}
+  .inquiry-card{padding:22px 17px!important}
+}
+@media(max-width:380px){
+  .moments .moment-card .moment-content h3{font-size:21px!important}
+  .mobile-book .mobile-book-action{padding:10px 8px}
+}
+@media(prefers-reduced-motion:reduce){.about-chevron{transition:none}}
