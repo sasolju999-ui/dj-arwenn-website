@@ -11,6 +11,35 @@
  */
 export default {
   async fetch(request, env) {
+    // Serve public SEO resources on the canonical Pages host without
+    // relying on the upstream service binding or a second Worker hop.
+    // The same URLs are also listed in root sitemap.xml and robots.txt.
+    const seoPath = new URL(request.url);
+    if (seoPath.hostname === "djarwenn.pages.dev" &&
+        (request.method === "GET" || request.method === "HEAD")) {
+      const seoFiles = {
+        "/sitemap.xml": {
+          body: "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n  <url><loc>https://djarwenn.pages.dev/</loc></url>\n  <url><loc>https://djarwenn.pages.dev/zasebnost.html</loc></url>\n</urlset>\n",
+          type: "application/xml; charset=utf-8"
+        },
+        "/robots.txt": {
+          body: "User-agent: *\nAllow: /\nSitemap: https://djarwenn.pages.dev/sitemap.xml\n",
+          type: "text/plain; charset=utf-8"
+        }
+      };
+      const seoAsset = seoFiles[seoPath.pathname];
+      if (seoAsset) {
+        return new Response(request.method === "HEAD" ? null : seoAsset.body, {
+          status: 200,
+          headers: {
+            "Content-Type": seoAsset.type,
+            "Cache-Control": "public, max-age=300",
+            "X-Content-Type-Options": "nosniff"
+          }
+        });
+      }
+    }
+
     // Serve the exact Google Search Console proof on the canonical Pages
     // hostname. Advanced-mode Pages Workers otherwise forward this path
     // to the origin Worker, where the Pages-only file does not exist.
