@@ -137,3 +137,25 @@ The current Web3Forms + hCaptcha flow remains active until **all** Cloudflare se
 ## Important: Dashboard variables and GitHub deployments
 
 Cloudflare Wrangler normally replaces dashboard-managed *plaintext variables* during a GitHub `wrangler deploy`. This project uses `"keep_vars": true` in `wrangler.jsonc` to preserve dashboard-managed variables. Encrypted Secrets are managed separately. After the first deploy with this setting, re-add any previously removed `TURNSTILE_SITE_KEY` and `ENQUIRY_TURNSTILE_ENABLED` under **Worker > Settings > Runtime variables and secrets > Production**. Use the real Turnstile public site key and exact string `true`, respectively. No secret values belong in the repository. Use `?debug_turnstile=1#inquiry-form` to check which configuration names are still invalid. Do not assume that a successful deployment means the form delivery has been verified.
+
+## Optional free short public address (staged, no downtime)
+
+**Target:** `https://arwenn.sasolju999.workers.dev/`
+
+The existing `https://dj-arwenn-website.sasolju999.workers.dev/` **must remain deployed and untouched**. The new `arwenn` Worker in `short-domain/` is a thin proxy via a Cloudflare **Service Binding**, not an HTTP redirect. It forwards the original request to the existing Worker, so the shorter hostname remains in the visitor's browser and both addresses use the **same** private D1 date list, booking code and email delivery backend. Do not create a second database or copy any Worker secrets.
+
+### Phone-friendly manual deployment (only after the code is reviewed)
+
+1. In the *same Cloudflare account*, go to **Workers & Pages → Create → Worker → Start with Hello World**. Set name `arwenn` (or another available short name). This should offer the corresponding `*.sasolju999.workers.dev` URL.
+2. Deploy the empty Worker, then use **Edit code** to replace its starter script with the **full contents** of `short-domain/worker.js` and deploy again. The Worker initially returns 503 until the Service Binding is added; the original production site keeps working.
+3. In **that new Worker's Settings → Bindings → Add binding → Service**, create **Binding name** `DJ_ARWENN_ORIGIN`, **Service** `dj-arwenn-website`; save/deploy the binding. This is not a D1 binding. If Cloudflare offers a specific environment choice, use the live production target.
+4. In **Turnstile → existing DJ Arwenn widget → Settings → Hostname management**, **add** the new hostname `arwenn.sasolju999.workers.dev` alongside the old hostname. Do not remove the old one and do not generate new keys. The backend checks that Siteverify's `hostname` matches the requested hostname, so this extra Turnstile allowance is required.
+5. Test the short site in a separate browser tab while the old site remains active: page loads with all images/styles; one original booked date still reports booked; another date shows enquiry open; Turnstile verifies; submit **one** test enquiry from the short URL and confirm actual Gmail delivery; owner admin date list is identical at both URLs.
+6. Only after all tests succeed, update SEO canonicals, social sharing URLs, `robots.txt`, `sitemap.xml`, and Linktree/FB/IG links to use the shorter URL. Search Console property should use **URL prefix + HTML tag** for the Workers subdomain (the user cannot add DNS verification records to `workers.dev`). Consider making the long address redirect to the short one **later**, only after the new address is working.
+
+**Important:** The short URL is **not created merely by merging a GitHub PR**. It must be created/deployed in Cloudflare as a separate Worker and connected with the Service Binding; the existing site's GitHub deployment does not provision a new Worker. The current main site's HTML canonical and Open Graph references intentionally stay on the old host until a verified, tested cutover. Do not delete, rename or overwrite `dj-arwenn-website` during setup.
+
+### CLI alternative (not required for mobile)
+
+From the repository root, a developer with Wrangler access can deploy the separate Worker using `npx wrangler deploy --config short-domain/wrangler.jsonc`, provided the account supports that Service Binding. This must never be run instead of the primary Worker deploy in the existing GitHub CI.
+
