@@ -13,6 +13,7 @@
       faq4Q:'Kako preverim prost termin?',faq4A:'Piši na Messenger ali pošlji povpraševanje z datumom in krajem dogodka. Odgovorim po preverjanju termina.',
       privacyLink:'ZASEBNOST',formOpenMail:'ODPRI E-POŠTO',formOpenMessenger:'MESSENGER',
       formRecover:'Oddaja ni bila potrjena. Podatki ostanejo v obrazcu; pošlji povpraševanje prek e-pošte ali Messengerja.',
+      turnstilePrivacy:'Razumem, da bodo moji podatki uporabljeni za odgovor na povpraševanje. Varnostno preverjanje opravi Cloudflare Turnstile, sporočilo pa posreduje Google Apps Script. Preberem lahko <a href="zasebnost.html" target="_blank" rel="noopener noreferrer">obvestilo o zasebnosti</a>.',turnstileServiceNote:'Obrazec uporablja Cloudflare Turnstile in Google Apps Script za dostavo sporočila. Če pošiljanje ni na voljo, lahko uporabiš e-pošto ali Messenger.',
       turnstileSuccess:'Povpraševanje je bilo poslano. Odgovorim, ko preverim termin.',
       turnstileIntro:'HITRO VARNOSTNO PREVERJANJE',turnstileWait:'Varnostno preverjanje se še nalaga. Poskusi znova ali uporabi Messenger.',formSlowDown:'Preveč povpraševanj v kratkem času. Poskusi pozneje ali mi piši na Messenger.',formUnavailable:'Pošiljanje trenutno ni na voljo. Poskusi znova ali mi piši prek Messengerja.',
       captchaIntro:'ZAŠČITA PRED NEŽELENO POŠTO · Potrdi, da nisi robot.',captchaRequired:'Pred pošiljanjem prosim potrdi preverjanje »Nisem robot«.',captchaUnavailable:'Varnostnega preverjanja ni mogoče naložiti. Poskusi osvežiti stran ali mi piši prek Messengerja.',captchaRetry:'Povpraševanje ni bilo poslano. Po potrebi ponovno opravi preverjanje »Nisem robot« in poskusi znova.',formSending:'POŠILJANJE ...',formSuccess:'Povpraševanje je Web3Forms sprejel. Za dokončno potrditev preveri še, ali je sporočilo prispelo v nabiralnik.',
@@ -43,6 +44,7 @@
       faq4Q:'How can I check availability?',faq4A:'Send a Messenger message or a booking enquiry with the event date and location. I will reply after checking availability.',
       privacyLink:'PRIVACY',formOpenMail:'OPEN EMAIL APP',formOpenMessenger:'MESSENGER',
       formRecover:'Submission could not be confirmed. Your details are still in the form. Please email your enquiry or use Messenger.',
+      turnstilePrivacy:'I understand that my details will be used to respond to my enquiry. Cloudflare Turnstile performs the security check and Google Apps Script delivers the message. Read the <a href="zasebnost.html" target="_blank" rel="noopener noreferrer">privacy notice</a>.',turnstileServiceNote:'This form uses Cloudflare Turnstile and Google Apps Script to deliver your message. You can also contact me by email or Messenger.',
       turnstileSuccess:'Your enquiry was sent. I will reply after checking availability.',
       turnstileIntro:'QUICK SECURITY CHECK',turnstileWait:'Security verification is still loading. Please retry or use Messenger.',formSlowDown:'Too many enquiries. Please retry later or message me on Messenger.',formUnavailable:'Sending is currently unavailable. Please retry or contact me on Messenger.',
       captchaIntro:'SPAM PROTECTION · Please confirm you are not a robot.',captchaRequired:'Please complete the “I am human” check before sending.',captchaUnavailable:'The security check could not load. Please refresh the page or contact me via Messenger.',captchaRetry:'Your request was not sent. Please complete the captcha again if needed and retry.',formSending:'SENDING ...',formSuccess:'Web3Forms accepted your enquiry. I will confirm availability after receiving the email.',
@@ -101,10 +103,39 @@
     const captchaBox = bookingForm.querySelector('.h-captcha');
     const captchaPanel = bookingForm.querySelector('.inquiry-captcha');
     const captchaLabel = captchaPanel?.querySelector('.inquiry-captcha-label');
+    const consentLabel = bookingForm.querySelector('[data-t="formPrivacy"]');
+    const serviceLabel = bookingForm.querySelector('[data-t="formServiceNote"]');
     let captchaMode = 'hcaptcha';
     let turnstileWidget = null;
     let turnstileToken = '';
     let turnstileReady = false;
+    let turnstileFailed = false;
+
+    function updateDeliveryLabels() {
+      if (consentLabel) consentLabel.innerHTML = captchaMode === 'turnstile'
+        ? strings[lang].turnstilePrivacy : strings[lang].formPrivacy;
+      if (serviceLabel) serviceLabel.textContent = captchaMode === 'turnstile'
+        ? strings[lang].turnstileServiceNote : strings[lang].formServiceNote;
+      if (captchaLabel) captchaLabel.textContent = captchaMode === 'turnstile'
+        ? strings[lang].turnstileIntro : strings[lang].captchaIntro;
+    }
+
+    // If Turnstile rejects its public site key or cannot load, the existing
+    // Web3Forms+hCaptcha form remains a server-verified delivery alternative.
+    function restoreHcaptcha() {
+      turnstileFailed = true;
+      turnstileToken = '';
+      turnstileReady = false;
+      captchaMode = 'hcaptcha';
+      if (captchaBox) captchaBox.hidden = false;
+      if (window.turnstile && turnstileWidget !== null) {
+        try { window.turnstile.remove(turnstileWidget); } catch (_) {}
+      }
+      turnstileWidget = null;
+      captchaPanel?.querySelectorAll('.turnstile-widget').forEach(node => node.remove());
+      updateDeliveryLabels();
+    }
+
     // Preserve hCaptcha until a fully configured Worker explicitly enables Turnstile.
     async function configureEnquiryCaptcha() {
       try {
@@ -125,24 +156,27 @@
               sitekey: config.sitekey,
               action: 'dj_enquiry',
               appearance: 'always',
-              callback: token => { turnstileToken = token; },
+              callback: token => { if (!turnstileFailed) turnstileToken = token; },
               'expired-callback': () => { turnstileToken = ''; },
-              'error-callback': () => { turnstileToken = ''; }
+              'error-callback': () => {
+                turnstileFailed = true;
+                if (turnstileReady) restoreHcaptcha();
+                return true;
+              }
             });
+            if (turnstileFailed) { restoreHcaptcha(); return; }
             captchaMode = 'turnstile';
             turnstileReady = true;
-            captchaBox.hidden = true;
-            if (captchaLabel) captchaLabel.textContent = strings[lang].turnstileIntro;
-          } catch (_) { /* Keep existing Web3Forms hCaptcha. */ }
+            if (captchaBox) captchaBox.hidden = true;
+            updateDeliveryLabels();
+          } catch (_) { restoreHcaptcha(); }
         };
-        script.onerror = () => { /* Existing hCaptcha stays available. */ };
+        script.onerror = () => { restoreHcaptcha(); };
         document.head.appendChild(script);
       } catch (_) { /* Existing hCaptcha stays available. */ }
     }
     configureEnquiryCaptcha();
-    document.addEventListener('arwenn:languagechanged', () => {
-      if (captchaMode === 'turnstile' && captchaLabel) captchaLabel.textContent = strings[lang].turnstileIntro;
-    });
+    document.addEventListener('arwenn:languagechanged', updateDeliveryLabels);
     let lastSuccessAt = 0;
     const showFormIssue = (text) => {
       status.hidden = false;
