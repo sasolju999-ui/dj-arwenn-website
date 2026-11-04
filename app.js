@@ -110,19 +110,6 @@
     let turnstileToken = '';
     let turnstileReady = false;
     let turnstileFailed = false;
-    // Opt-in diagnostics: only visible with ?debug_turnstile=1, never show secrets.
-    const turnstileDebug = new URLSearchParams(window.location.search).get('debug_turnstile') === '1';
-    let debugBox = null;
-    function debugTurnstile(message) {
-      if (!turnstileDebug || !captchaPanel) return;
-      if (!debugBox) {
-        debugBox = document.createElement('pre');
-        debugBox.setAttribute('role','status');
-        debugBox.style.cssText = 'background:#201d22;color:#fff;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.55 ui-monospace,monospace;border-radius:6px;margin:12px 0 0';
-        captchaPanel.appendChild(debugBox);
-      }
-      debugBox.textContent = 'TURNSTILE DEBUG (no secrets)\nHost: ' + window.location.hostname + '\n' + message;
-    }
 
     function updateDeliveryLabels() {
       if (consentLabel) consentLabel.innerHTML = captchaMode === 'turnstile'
@@ -133,8 +120,7 @@
         ? strings[lang].turnstileIntro : strings[lang].captchaIntro;
     }
 
-    // If Turnstile rejects its public site key or cannot load, the existing
-    // Web3Forms+hCaptcha form remains a server-verified delivery alternative.
+    // Preserve the Web3Forms + hCaptcha fallback if Turnstile cannot run.
     function restoreHcaptcha() {
       turnstileFailed = true;
       turnstileToken = '';
@@ -149,33 +135,17 @@
       updateDeliveryLabels();
     }
 
-    // Preserve hCaptcha until a fully configured Worker explicitly enables Turnstile.
     async function configureEnquiryCaptcha() {
       try {
-        debugTurnstile('Checking /api/enquiry/config...');
-        const response = await fetch('/api/enquiry/config' + (turnstileDebug ? '?debug_turnstile=1' : ''), { cache:'no-store' });
-        if (!response.ok) { debugTurnstile('Configuration HTTP ' + response.status + '; original hCaptcha in use.'); return; }
+        const response = await fetch('/api/enquiry/config', { cache:'no-store' });
+        if (!response.ok) return;
         const config = await response.json();
-        if (config.mode !== 'turnstile') {
-          const missing = Array.isArray(config.missing) ? config.missing.filter(name => typeof name === 'string') : [];
-          debugTurnstile('Configuration mode: ' + String(config.mode ?? 'missing') +
-            '; hCaptcha in use.\nMissing or invalid settings: ' +
-            (missing.length ? missing.join(', ') : 'not reported') +
-            '\nNo secret values are shown.');
-          return;
-        }
-        if (typeof config.sitekey !== 'string') {
-          debugTurnstile('Turnstile site key missing from configuration.');
-          return;
-        }
-        debugTurnstile('Turnstile mode active. Public key length: ' + config.sitekey.length + 
-          ', starts: ' + config.sitekey.slice(0, 4) + ', ends: ' + config.sitekey.slice(-4) + '. Loading script...');
+        if (config.mode !== 'turnstile' || typeof config.sitekey !== 'string') return;
         const script = document.createElement('script');
         script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
         script.async = true;
         script.onload = () => {
-          if (!window.turnstile) { debugTurnstile('Script loaded but window.turnstile is missing.'); return; }
-          debugTurnstile('Turnstile library loaded. Rendering widget...');
+          if (!window.turnstile) return;
           try {
             const container = document.createElement('div');
             container.className = 'turnstile-widget';
@@ -184,16 +154,9 @@
               sitekey: config.sitekey,
               action: 'dj_enquiry',
               appearance: 'always',
-              callback: token => {
-                if (!turnstileFailed) {
-                  turnstileToken = token;
-                  debugTurnstile('Verification passed; Turnstile is active.');
-                }
-              },
-              'expired-callback': () => { turnstileToken = ''; debugTurnstile('Verification expired; retry is needed.'); },
-              'error-callback': (code) => {
-                debugTurnstile('Turnstile failed with error code: ' + String(code ?? 'unknown').slice(0, 30) +
-                  '. Restoring working hCaptcha.');
+              callback: token => { if (!turnstileFailed) turnstileToken = token; },
+              'expired-callback': () => { turnstileToken = ''; },
+              'error-callback': () => {
                 turnstileFailed = true;
                 if (turnstileReady) restoreHcaptcha();
                 return true;
@@ -204,22 +167,15 @@
             turnstileReady = true;
             if (captchaBox) captchaBox.hidden = true;
             updateDeliveryLabels();
-          } catch (error) {
-            debugTurnstile('Turnstile render exception: ' + String(error?.name || 'unknown') + '; restoring hCaptcha.');
-            restoreHcaptcha();
-          }
+          } catch (_) { restoreHcaptcha(); }
         };
-        script.onerror = () => {
-          debugTurnstile('Turnstile script failed to load; restoring hCaptcha.');
-          restoreHcaptcha();
-        };
+        script.onerror = () => { restoreHcaptcha(); };
         document.head.appendChild(script);
-      } catch (error) {
-        debugTurnstile('Configuration fetch failed: ' + String(error?.name || 'network error') + '; hCaptcha in use.');
-      }
+      } catch (_) { /* Keep the existing hCaptcha flow on network errors. */ }
     }
     configureEnquiryCaptcha();
     document.addEventListener('arwenn:languagechanged', updateDeliveryLabels);
+
     let lastSuccessAt = 0;
     const showFormIssue = (text) => {
       status.hidden = false;

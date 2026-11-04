@@ -282,11 +282,6 @@ function enquiryConfig(request, env) {
   const payload = active
     ? { mode: "turnstile", sitekey: env.TURNSTILE_SITE_KEY }
     : { mode: "hcaptcha" };
-  // Optional support diagnostic; only configuration names are returned.
-  // Does not include a key, token, URL value or personally identifying data.
-  if (new URL(request.url).searchParams.get("debug_turnstile") === "1") {
-    payload.missing = enquiryBridgeMissing(env);
-  }
   return reply(payload);
 }
 
