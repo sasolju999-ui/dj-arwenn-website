@@ -134,3 +134,6 @@ The current Web3Forms + hCaptcha flow remains active until **all** Cloudflare se
 - No custom domain or paid Web3Forms upgrade is required for this implementation. However, it still depends on an account that allows public Apps Script web apps and sufficient free MailApp quota.
 - Users can still contact the DJ via Messenger or their email client if automated delivery fails. The Worker does not store enquiry personal details in D1, and the script does not log them.
 
+## Important: Dashboard variables and GitHub deployments
+
+Cloudflare Wrangler normally replaces dashboard-managed *plaintext variables* during a GitHub `wrangler deploy`. This project uses `"keep_vars": true` in `wrangler.jsonc` to preserve dashboard-managed variables. Encrypted Secrets are managed separately. After the first deploy with this setting, re-add any previously removed `TURNSTILE_SITE_KEY` and `ENQUIRY_TURNSTILE_ENABLED` under **Worker > Settings > Runtime variables and secrets > Production**. Use the real Turnstile public site key and exact string `true`, respectively. No secret values belong in the repository. Use `?debug_turnstile=1#inquiry-form` to check which configuration names are still invalid. Do not assume that a successful deployment means the form delivery has been verified.
