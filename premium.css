@@ -449,7 +449,7 @@ h1 em,h2 em,.section h2 em,.contact h2 em{color:#f04761;font-style:normal}
 @media(max-width:760px){.faq-grid{grid-template-columns:1fr}.dj-faq{padding:69px 0}.faq-grid details{padding:19px}.service-area{font-size:9px;margin-bottom:15px;letter-spacing:.07em}}
 @media(max-width:650px){
   .mobile-book{padding:13px 20px!important;min-height:58px!important;font-size:11px!important;letter-spacing:.1em}
-  .footer{padding-bottom:84px}
+  .footer{padding-bottom:30px}
 }
 
 /* Booking requests only: no public availability or booked dates displayed. */
@@ -1143,20 +1143,20 @@ html{scroll-padding-top:88px}
 }
 .about-record-scene svg.retro-cassette:after{content:none!important}
 /* Adjusted watermark contrast (mini logo never overlaps the large artwork). */
-.moments .moment-card .moment-watermark{opacity:.18!important}
-.moments .moment-card .ig-orb,.moments .moment-card .link-orb{opacity:.46!important}
+.moments .moment-card .moment-watermark{opacity:.26!important}
+.moments .moment-card .ig-orb,.moments .moment-card .link-orb{opacity:.60!important}
 /* Mobile: preserve approved form, step cards, logo buttons and typography. */
 @media(max-width:650px){
   /* 17-screen QA: shared rhythm for only the sections that had oversized gaps. */
   .hero-grid{padding-top:60px!important}
   .hero-copy{padding-top:14px!important}
   .services{padding-top:55px!important;padding-bottom:43px!important}
-  .music{padding-top:45px!important;padding-bottom:44px!important}
-  .about{padding-top:43px!important;padding-bottom:43px!important}
+  .music{padding-top:45px!important;padding-bottom:15px!important}
+  .about{padding-top:20px!important;padding-bottom:43px!important}
   .collaboration{padding-top:44px!important;padding-bottom:46px!important}
-  .moments{padding-top:44px!important;padding-bottom:45px!important}
-  .dj-faq{padding-bottom:40px!important}
-  .contact{padding-top:47px!important}
+  .moments{padding-top:44px!important;padding-bottom:18px!important}
+  .dj-faq{padding-top:29px!important;padding-bottom:26px!important}
+  .contact{padding-top:47px!important;padding-bottom:25px!important}
   /* Let actual text set tile height; consistent 51px header band for icon. */
   .services-grid .service-card{
     min-height:0!important;height:auto!important;
@@ -1164,7 +1164,7 @@ html{scroll-padding-top:88px}
     gap:0!important;padding:16px 18px 18px!important;
   }
   .services-grid .service-card>div:last-child{
-    margin-top:51px!important;max-width:100%!important;
+    margin-top:18px!important;max-width:100%!important;
   }
   .services-grid .service-card>.service-art{
     width:160px;bottom:-21px;right:-24px;opacity:.15;
@@ -1182,7 +1182,7 @@ html{scroll-padding-top:88px}
   }
 }
 @media(max-width:380px){
-  .services-grid .service-card>div:last-child{margin-top:52px!important}
+  .services-grid .service-card>div:last-child{margin-top:20px!important}
   .services-grid .service-card>.service-art{width:140px;opacity:.14}
   .music-panel>.music-speaker-art{width:101px;opacity:.13}
   .about-record-scene svg.turntable-tonearm{width:110px!important;height:148px!important}
@@ -1190,4 +1190,38 @@ html{scroll-padding-top:88px}
 }
 @media(prefers-reduced-motion:reduce){
   .services-grid .service-card>.service-art,.music-panel>.music-speaker-art{transition:none}
+}
+
+/* Post-merge phone QA: finish footer spacing and label geometry. */
+.about-record-scene .about-record-label{
+  position:relative;isolation:isolate;
+  transform:rotate(13deg); /* upright typography despite spinning-record illustration */
+}
+.about-record-scene .about-record-label>span:first-child{
+  position:absolute;top:16%;left:0;right:0;
+  line-height:1;font-size:11px;letter-spacing:.13em;
+}
+.about-record-scene .about-record-label>strong{
+  position:absolute;top:56%;left:2%;right:2%;
+  font-size:clamp(12px,1.8vw,20px);line-height:1.1;
+}
+.about-record-scene .about-record-label>small{
+  position:absolute;top:79%;left:0;right:0;
+  font-size:9px;letter-spacing:.11em;line-height:1;
+}
+.about-record-scene .about-record-label .record-spindle{
+  position:absolute;z-index:3;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:8px;height:8px;border-radius:50%;
+  background:#0b0b11;border:1px solid #f8c9d3;
+  box-shadow:0 0 0 2px #89112c,0 1px 2px #000a,inset 0 0 2px #000;
+}
+@media(max-width:650px){
+  /* Avoid the double gap from contact's bottom padding + footer's top padding. */
+  .footer{padding-top:27px!important;padding-bottom:30px!important}
+  .footer-top{padding-bottom:24px}
+  .footer-social{margin-top:6px;padding-top:24px;padding-bottom:24px}
+  .footer-bottom{padding-top:18px}
+  /* The first paragraph begins closer to the event icon, with breathable line height. */
+  .services-grid .service-card{padding-bottom:16px!important}
 }
