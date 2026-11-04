@@ -249,23 +249,45 @@ async function managePrivateDates(request, env) {
  * and ENQUIRY_TURNSTILE_ENABLED is explicitly "true".
  * The original Web3Forms/hCaptcha form stays available until activation.
  */
+function enquiryBridgeMissing(env) {
+  // Diagnostic labels only; NEVER return env values, passwords or secret material.
+  const missing = [];
+  if (env.ENQUIRY_TURNSTILE_ENABLED !== "true") missing.push("ENQUIRY_TURNSTILE_ENABLED");
+  if (typeof env.TURNSTILE_SITE_KEY !== "string" || env.TURNSTILE_SITE_KEY.length < 20) {
+    missing.push("TURNSTILE_SITE_KEY");
+  }
+  if (typeof env.TURNSTILE_SECRET_KEY !== "string" || env.TURNSTILE_SECRET_KEY.length < 20) {
+    missing.push("TURNSTILE_SECRET_KEY");
+  }
+  if (typeof env.ENQUIRY_BRIDGE_TOKEN !== "string" || env.ENQUIRY_BRIDGE_TOKEN.length < 32) {
+    missing.push("ENQUIRY_BRIDGE_TOKEN");
+  }
+  if (typeof env.ENQUIRY_APPS_SCRIPT_URL !== "string" ||
+      !/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(env.ENQUIRY_APPS_SCRIPT_URL)) {
+    missing.push("ENQUIRY_APPS_SCRIPT_URL");
+  }
+  if (!env.DB) missing.push("DB");
+  if (typeof env.AVAILABILITY_HASH_SALT !== "string" ||
+      env.AVAILABILITY_HASH_SALT.length < 24) missing.push("AVAILABILITY_HASH_SALT");
+  return missing;
+}
+
 function enquiryBridgeReady(env) {
-  return env.ENQUIRY_TURNSTILE_ENABLED === "true" &&
-    typeof env.TURNSTILE_SITE_KEY === "string" && env.TURNSTILE_SITE_KEY.length >= 20 &&
-    typeof env.TURNSTILE_SECRET_KEY === "string" && env.TURNSTILE_SECRET_KEY.length >= 20 &&
-    typeof env.ENQUIRY_BRIDGE_TOKEN === "string" && env.ENQUIRY_BRIDGE_TOKEN.length >= 32 &&
-    typeof env.ENQUIRY_APPS_SCRIPT_URL === "string" &&
-    /^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(env.ENQUIRY_APPS_SCRIPT_URL) &&
-    Boolean(env.DB && env.AVAILABILITY_HASH_SALT && env.AVAILABILITY_HASH_SALT.length >= 24);
+  return enquiryBridgeMissing(env).length === 0;
 }
 
 function enquiryConfig(request, env) {
   if (request.method !== "GET") return reply({ error: "method_not_allowed" }, 405);
-  if (enquiryBridgeReady(env)) {
-    // Site key is public; all private values remain Worker secrets.
-    return reply({ mode: "turnstile", sitekey: env.TURNSTILE_SITE_KEY });
+  const active = enquiryBridgeReady(env);
+  const payload = active
+    ? { mode: "turnstile", sitekey: env.TURNSTILE_SITE_KEY }
+    : { mode: "hcaptcha" };
+  // Optional support diagnostic; only configuration names are returned.
+  // Does not include a key, token, URL value or personally identifying data.
+  if (new URL(request.url).searchParams.get("debug_turnstile") === "1") {
+    payload.missing = enquiryBridgeMissing(env);
   }
-  return reply({ mode: "hcaptcha" });
+  return reply(payload);
 }
 
 function safeField(input, limit) {

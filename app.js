@@ -153,11 +153,15 @@
     async function configureEnquiryCaptcha() {
       try {
         debugTurnstile('Checking /api/enquiry/config...');
-        const response = await fetch('/api/enquiry/config', { cache:'no-store' });
+        const response = await fetch('/api/enquiry/config' + (turnstileDebug ? '?debug_turnstile=1' : ''), { cache:'no-store' });
         if (!response.ok) { debugTurnstile('Configuration HTTP ' + response.status + '; original hCaptcha in use.'); return; }
         const config = await response.json();
         if (config.mode !== 'turnstile') {
-          debugTurnstile('Configuration mode: ' + String(config.mode ?? 'missing') + '; hCaptcha in use.');
+          const missing = Array.isArray(config.missing) ? config.missing.filter(name => typeof name === 'string') : [];
+          debugTurnstile('Configuration mode: ' + String(config.mode ?? 'missing') +
+            '; hCaptcha in use.\nMissing or invalid settings: ' +
+            (missing.length ? missing.join(', ') : 'not reported') +
+            '\nNo secret values are shown.');
           return;
         }
         if (typeof config.sitekey !== 'string') {
