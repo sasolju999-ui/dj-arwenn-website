@@ -159,3 +159,21 @@ The existing `https://dj-arwenn-website.sasolju999.workers.dev/` **must remain d
 
 From the repository root, a developer with Wrangler access can deploy the separate Worker using `npx wrangler deploy --config short-domain/wrangler.jsonc`, provided the account supports that Service Binding. This must never be run instead of the primary Worker deploy in the existing GitHub CI.
 
+## Optional private-label public URL with Cloudflare Pages (zero extra monthly cost)
+
+Desired URL: `https://djarwenn.pages.dev/` **if the Pages project name `djarwenn` is available**. This is shorter and does not include the Cloudflare account's `sasolju999` subdomain in the visible public URL. Pages project names are not reserved by this commit and may already be taken.
+
+The `pages-alias/` folder is a **separate Pages project** with an advanced-mode `_worker.js`, not a replacement for `dj-arwenn-website`. A Pages **Service binding** named `DJ_ARWENN_ORIGIN` forwards browser requests to the existing Worker, which still handles all assets, availability checks, private bookings and Gmail delivery. No public 301/302 redirect, no duplicated database, and no copied private keys. Until the owner has tested the new URL, the original site and its current social links remain in use.
+
+### Safe setup on the phone
+
+1. Cloudflare dashboard → Workers & Pages → Create → **Pages** → Connect to Git. Pick the existing repository `sasolju999-ui/dj-arwenn-website`. Do not rename/delete the existing Worker.
+2. Set **Project name** to `djarwenn`, if available, for the URL `djarwenn.pages.dev`. Leave **Framework preset** as None, **Build command** blank (or `exit 0` if required), and **Build output directory** `pages-alias` relative to repository root. Keep repository **Root directory** empty/default. This deploys just the `pages-alias/` folder, including its `_worker.js` module.
+3. Before expecting the alias to work, go to the new **Pages** project → Settings → Bindings → **Add → Service binding**. Set variable name `DJ_ARWENN_ORIGIN` and Service `dj-arwenn-website`. Save and redeploy the Pages project for the binding to take effect.
+4. The proxy intentionally returns 503 if the service binding is absent. The existing site is unaffected.
+5. Open the existing **Cloudflare Turnstile widget**, add hostname `djarwenn.pages.dev` to allowed hostnames **in addition** to `dj-arwenn-website.sasolju999.workers.dev`. Do not regenerate Site Key or Secret Key.
+6. Test Pages URL and compare against old: loading images/CSS, blocked and open dates, Turnstile check, one real test enquiry arriving in Gmail, owner/admin dates. All must work before sharing the short URL.
+7. After the above tests, decide whether to set Pages variable `PUBLIC_ALIAS_READY=true` and redeploy to permit indexation. Only then update canonical/OG/schema URLs, sitemap, robots, Google Search Console, social links, and optionally redirect the old address after a later separate safe migration. The old host is **currently still embedded in public HTML/metadata and can still be discovered by technical inspection**, so the shorter URL is branding, **not a privacy or anonymity guarantee**.
+
+Never enable Pages automatic deployment from the repository root's primary Worker settings, and never change the existing `wrangler.jsonc` deployment command to deploy `pages-alias`. The folder-based Pages integration is separate. Do not paste private Cloudflare secrets into Pages, GitHub, or chat.
+
