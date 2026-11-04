@@ -3,7 +3,7 @@
   'use strict';
   const strings = {
     sl: {
-      aboutReadMore:"PREBERI CELOTNO ZGODBO",aboutReadLess:"SKRIJ ZGODBO",musicPanelFoot:"TVAJA GLASBA. TVOJ VEČER.",inquiryLabel:"POVPRAŠEVANJE / DJ ARWENN",
+      aboutReadMore:"PREBERI CELOTNO ZGODBO",aboutReadLess:"SKRIJ ZGODBO",musicPanelFoot:"TVOJA GLASBA. TVOJ VEČER.",inquiryLabel:"POVPRAŠEVANJE / DJ ARWENN",
       navAbout:"O meni",
       musicPrivateTitle:"ZA VSE GENERACIJE",
       musicPrivateBody:"Slovenska, hrvaška, narodna in balkanska glasba, pop, rock ter hiti in remixi za skupno petje in ples.",
