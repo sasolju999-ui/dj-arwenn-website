@@ -26,9 +26,10 @@ export default {
     // Public API calls remain same-origin in the browser.
     const response = await env.DJ_ARWENN_ORIGIN.fetch(request);
 
-    // Avoid duplicate Google indexing before all paths, Turnstile and Gmail
-    // have been tested and the canonical URLs have been updated.
-    if (env.PUBLIC_ALIAS_READY === "true") return response;
+    // The primary Pages hostname has passed live form and Turnstile testing
+    // and now has matching canonical URLs and sitemap. Allow indexing only
+    // there; unique deployment and preview hostnames must remain noindex.
+    if (new URL(request.url).hostname === "djarwenn.pages.dev") return response;
     const headers = new Headers(response.headers);
     headers.set("X-Robots-Tag", "noindex, nofollow");
     headers.set("Cache-Control", "no-store");
