@@ -914,3 +914,179 @@ html{scroll-padding-top:88px}
   .mobile-book .mobile-book-action{padding:10px 8px}
 }
 @media(prefers-reduced-motion:reduce){.about-chevron{transition:none}}
+
+
+/* Visual QA round 3 — compact proportions, deliberate logo separation, refined record. */
+/* Keep the translated music strapline readable: global panel span styling was
+   accidentally making the whole line a 19px decorative symbol. */
+.music-panel{height:auto!important;min-height:300px!important;padding:25px 26px 22px!important;gap:0}
+.music-panel .genre-label{margin:24px 0 16px}
+.music-panel .genre-tags{margin:0}
+.music-panel .music-panel-foot{
+  display:flex!important;align-items:center;justify-content:space-between;
+  gap:12px;flex-wrap:nowrap;margin-top:21px;padding-top:17px;min-width:0;
+  border-top:1px solid #ffffff35;
+}
+.music-panel .music-panel-foot .music-panel-slogan{
+  flex:1 1 auto;min-width:0;display:block;
+  font:800 11px/1.5 Inter,"Segoe UI",Arial,sans-serif!important;
+  letter-spacing:.08em!important;color:#d6cdd3!important;
+  overflow-wrap:normal!important;word-break:normal!important;
+  white-space:normal!important;text-transform:uppercase;
+}
+.music-panel .music-panel-foot .music-panel-spark{
+  flex:0 0 auto;font:900 20px/1 Inter,Arial,sans-serif!important;
+  color:#f23a5c!important;letter-spacing:0!important;
+}
+/* Slightly denser event cards; social-style bordered pictograms. */
+.services-grid .service-card{
+  min-height:203px!important;padding:19px 21px!important;
+  background-clip:padding-box;
+}
+.services-grid .service-card .card-top{
+  position:absolute;top:16px;right:17px;z-index:3;
+  display:flex;align-items:center;justify-content:center;
+  width:49px;height:49px;min-height:0!important;margin:0!important;
+  border-radius:11px;border:1px solid #ffffff42;
+  background:linear-gradient(135deg,#ffffff1d,#ffffff0b);
+  box-shadow:0 7px 20px #0005;
+}
+.services-grid .service-card .card-top svg{
+  width:30px;height:30px;opacity:1;filter:none;color:#f8b7c4;
+}
+.services-grid .service-card:after{
+  width:115px;height:115px;top:75px;right:-29px;
+  opacity:.65;pointer-events:none;
+}
+.services-grid .service-card>div:last-child{
+  margin-top:auto;max-width:calc(100% - 22px);
+}
+.services-grid .service-card h3{margin-bottom:8px;font-size:clamp(20px,2.1vw,26px)}
+.services-grid .service-card p{font-size:12.5px;line-height:1.55}
+/* Big social marks stay in the background; mini-icon never sits on top of one. */
+.moments .moment-card,
+.moments .moment-link{min-height:182px!important;padding:20px 22px!important}
+.moments .moment-card .moment-top{margin-top:0;margin-bottom:12px}
+.moments .moment-card .moment-content h3{max-width:76%!important;margin-bottom:10px!important}
+.moments .moment-card .moment-watermark{
+  top:auto!important;right:-6px!important;bottom:-53px!important;
+  font-size:172px!important;opacity:.13!important;transform:rotate(-8deg);
+}
+.moments .moment-card .ig-orb{
+  top:auto!important;bottom:-47px!important;right:-42px!important;
+  width:155px!important;height:155px!important;border-width:25px!important;opacity:.38!important;
+}
+.moments .moment-card .ig-orb:before{inset:32px;border-width:12px}
+.moments .moment-card .link-orb{
+  top:auto!important;bottom:-34px!important;right:-18px!important;
+  font-size:152px!important;opacity:.38!important;
+}
+.moments .moment-card .moment-icon{
+  top:15px!important;right:17px!important;width:41px;height:41px;
+  border-color:#ffffff5b;background:#24242bd9;
+  box-shadow:0 8px 20px #0008;
+}
+.moments .moment-card .moment-content{padding-right:0}
+/* The teaser stays a media placeholder, not a full empty screen. */
+.moments .moments-teaser{
+  min-height:0!important;margin:24px 0 17px!important;
+  padding:27px 30px!important;
+}
+.moments .moments-teaser h3{
+  font-size:clamp(24px,3.4vw,38px)!important;
+  margin:12px 0 11px!important;
+}
+.moments .moments-teaser p{margin-bottom:13px!important}
+/* Clearer vinyl illustration: needle sits in the outer grooves, away from the label. */
+.about-record-scene{overflow:hidden}
+.about-record-scene .record-edition{z-index:6;top:23px;left:25px;text-shadow:0 2px 10px #000}
+.about-record-scene .about-record{
+  top:8%;left:18%;width:97%;
+  box-shadow:0 25px 55px #000a, inset 0 0 0 2px #ffffff17;
+}
+.about-record-scene .turntable-tonearm{
+  top:10%;right:11%;height:27%;width:13px;
+  transform:rotate(37deg);transform-origin:50% 6%;
+  z-index:3;border-radius:10px;
+  background:linear-gradient(90deg,#3b3e48,#c9c5ca 40%,#555560);
+}
+.about-record-scene .turntable-tonearm:before{
+  width:28px;height:28px;left:-8px;top:-10px;
+}
+.about-record-scene .turntable-tonearm span{
+  width:19px;height:22px;left:-3px;bottom:-12px;
+  background:linear-gradient(140deg,#c7c4cb,#57515e 75%);
+}
+.about-record-scene .retro-cassette{
+  left:6%;bottom:27%;z-index:4;
+  border-radius:7px;border-color:#8b8087;
+  background:linear-gradient(175deg,#39353d 0 22%,#c6bec0 23% 73%,#30292f 74%);
+  box-shadow:0 8px 25px #000c,inset 0 0 0 4px #17161b;
+}
+.about-record-scene .retro-cassette:after{
+  content:"";position:absolute;left:17px;right:17px;bottom:6px;height:5px;
+  border-radius:3px;background:repeating-linear-gradient(90deg,#39333c 0 8px,transparent 8px 16px);
+}
+.about-record-scene .cassette-window{
+  background:#24232c;border-color:#97909d;
+  box-shadow:inset 0 2px 5px #0008;
+}
+.about-record-scene .cassette-window span{
+  border:4px dotted #d1c5cc;background:radial-gradient(circle,#25222b 0 24%,#595562 30% 100%);
+}
+.about-record-scene .record-bottom{z-index:6}
+/* Lower glare: actual input and date note remain legible on graphite. */
+.inquiry-card .date-discretion-note{
+  color:#d3cbd1!important;line-height:1.6;font-size:12px;
+}
+.inquiry-card .form-help.form-service-note{color:#cdc3ca!important}
+/* Mobile refinements are scoped to small screens so desktop stays steady. */
+@media(max-width:650px){
+  .hero-grid{padding-top:92px!important;gap:13px!important}
+  .hero-copy{padding-bottom:2px!important}
+  .hero .hero-lead{margin-bottom:15px}
+  .hero .service-area{margin-bottom:12px}
+  .hero .hero-meta{margin-top:15px}
+  .hero-art{height:340px!important}
+  .services-grid{gap:10px!important}
+  .services-grid .service-card{min-height:174px!important;padding:17px 18px!important}
+  .services-grid .service-card .card-top{
+    top:14px;right:14px;width:42px;height:42px;
+  }
+  .services-grid .service-card .card-top svg{width:26px;height:26px}
+  .services-grid .service-card:after{width:95px;height:95px;top:63px;right:-28px}
+  .services-grid .service-card h3{font-size:clamp(21px,6vw,25px)}
+  .services-grid .service-card p{font-size:12px;line-height:1.5}
+  .music-panel{min-height:0!important;padding:21px 22px 19px!important}
+  .music-panel .genre-label{margin:19px 0 19px;font-size:clamp(23px,6.6vw,30px)}
+  .music-panel .music-panel-foot .music-panel-slogan{
+    font-size:10px!important;letter-spacing:.04em!important;
+  }
+  .moments .moments-teaser{padding:22px 23px!important;margin:21px 0 15px!important}
+  .moments .moments-teaser h3{font-size:clamp(23px,6.5vw,30px)!important}
+  .moments .moments-teaser p{font-size:12px;line-height:1.6}
+  .moments .moment-card,.moments .moment-link{
+    min-height:170px!important;padding:18px 20px!important;
+  }
+  .moments .moment-card .moment-icon{top:12px!important;right:14px!important}
+  .moments .moment-card .moment-content h3{
+    max-width:74%!important;font-size:clamp(20px,5.8vw,25px)!important;
+  }
+  .about-record-scene{min-height:360px!important}
+  .about-record-scene .about-record{width:100%;left:16%;top:8%}
+  .about-record-scene .turntable-tonearm{top:10%;right:11%;height:26%;width:11px}
+  .about-record-scene .retro-cassette{left:5%;bottom:28%;width:100px;height:62px}
+  .about-record-scene .record-edition{top:20px;left:22px;font-size:9px}
+  .mobile-book{
+    min-height:50px!important;padding:6px 12px!important;gap:9px!important;
+  }
+  .mobile-book .mobile-book-brand img{width:75px!important;height:27px!important}
+  .mobile-book .mobile-book-action{
+    font-size:9px!important;padding:9px 12px!important;min-height:35px;
+  }
+}
+@media(max-width:380px){
+  .moments .moment-card .moment-content h3{max-width:77%!important}
+  .services-grid .service-card{min-height:186px!important}
+  .music-panel .music-panel-foot .music-panel-slogan{font-size:9.5px!important}
+}
