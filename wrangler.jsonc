@@ -18,7 +18,7 @@
     }
   ],
   "vars": {
-    "TURNSTILE_SITE_KEY": "0x4AAAAAAAFy72_XM3bNynqhT",
+    "TURNSTILE_SITE_KEY": "0x4AAAAAAFy72_XM3bNynqhT",
     "ENQUIRY_TURNSTILE_ENABLED": "true"
   }
 }
