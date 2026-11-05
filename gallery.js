@@ -45,7 +45,7 @@
   feature.setAttribute('aria-label','Fotogalerija DJ Arwenn');
   feature.innerHTML='<h3></h3><p></p><div class="arwenn-mosaic"></div><button class="arwenn-feature-more" type="button"><span class="text"></span><span class="arrow" aria-hidden="true">↗</span></button>';
   const mosaic = feature.querySelector('.arwenn-mosaic');
-  const selected = [18,12,1,19,16];
+  const selected = [19,12,1,18,16];
   selected.forEach(number=>{
     const p=photos[number-1];
     const button=document.createElement('button'); button.type='button'; button.dataset.number=number;
