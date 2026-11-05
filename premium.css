@@ -1148,8 +1148,8 @@ html{scroll-padding-top:88px}
 /* Mobile: preserve approved form, step cards, logo buttons and typography. */
 @media(max-width:650px){
   /* 17-screen QA: shared rhythm for only the sections that had oversized gaps. */
-  .hero-grid{padding-top:60px!important}
-  .hero-copy{padding-top:14px!important}
+  .hero-grid{padding-top:20px!important}
+  .hero-copy{padding-top:8px!important}
   .services{padding-top:55px!important;padding-bottom:43px!important}
   .music{padding-top:45px!important;padding-bottom:15px!important}
   .about{padding-top:20px!important;padding-bottom:43px!important}
@@ -1224,4 +1224,24 @@ html{scroll-padding-top:88px}
   .footer-bottom{padding-top:18px}
   /* The first paragraph begins closer to the event icon, with breathable line height. */
   .services-grid .service-card{padding-bottom:16px!important}
+}
+
+/* Balanced black lettering around true center spindle hole. */
+.about-record-scene .about-record-label .record-label-typography{
+ position:absolute;inset:0;display:block;width:100%;height:100%;
+ overflow:visible;z-index:2;pointer-events:none;
+}
+.about-record-scene .about-record-label .record-spindle{z-index:4}
+/* Reference-guided S-shaped tonearm, bearing and detachable headshell. */
+.about-record-scene svg.turntable-tonearm{
+ top:8%!important;right:5.5%!important;width:186px!important;height:auto!important;
+ max-width:none;filter:drop-shadow(0 7px 7px #0009);
+}
+@media(max-width:650px){
+ .about-record-scene svg.turntable-tonearm{
+  top:8%!important;right:5.5%!important;width:177px!important;height:auto!important;
+ }
+}
+@media(max-width:380px){
+ .about-record-scene svg.turntable-tonearm{width:156px!important;right:4%!important}
 }
