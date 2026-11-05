@@ -16,3 +16,7 @@ assets/*
 !sitemap.xml
 !availability.js
 !admin.html
+# Public photo gallery (only optimized WebP images, no archives)
+!gallery.js
+!assets/gallery/
+!assets/gallery/*.webp
