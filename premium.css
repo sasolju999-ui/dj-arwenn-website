@@ -1234,14 +1234,14 @@ html{scroll-padding-top:88px}
 .about-record-scene .about-record-label .record-spindle{z-index:4}
 /* Reference-guided S-shaped tonearm, bearing and detachable headshell. */
 .about-record-scene svg.turntable-tonearm{
- top:8%!important;right:5.5%!important;width:186px!important;height:auto!important;
+ top:5%!important;right:5.5%!important;width:300px!important;height:auto!important;
  max-width:none;filter:drop-shadow(0 7px 7px #0009);
 }
 @media(max-width:650px){
  .about-record-scene svg.turntable-tonearm{
-  top:8%!important;right:5.5%!important;width:177px!important;height:auto!important;
+  top:6%!important;right:5.5%!important;width:270px!important;height:auto!important;
  }
 }
 @media(max-width:380px){
- .about-record-scene svg.turntable-tonearm{width:156px!important;right:4%!important}
+ .about-record-scene svg.turntable-tonearm{width:235px!important;right:4%!important}
 }
