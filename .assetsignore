@@ -11,6 +11,7 @@ assets/*
 !assets/favicon.svg
 !assets/dj-arwenn-portret.webp
 !assets/dj-arwenn-logo-transparent.png
+!assets/dj-arwenn-story-approved.png
 !zasebnost.html
 !sitemap.xml
 !availability.js
