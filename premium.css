@@ -1245,3 +1245,16 @@ html{scroll-padding-top:88px}
 @media(max-width:380px){
  .about-record-scene svg.turntable-tonearm{width:235px!important;right:4%!important}
 }
+
+/* Approved artwork replaces only the former CSS/SVG record illustration.
+   Deliberately keep the exact full square image, including its own caption. */
+.about-visual--approved{min-width:0}
+.about-visual--approved .approved-story-image{
+  display:block;width:100%;height:auto;aspect-ratio:1;
+  border:0;border-radius:12px;object-fit:contain;
+  background:#0d0b11;
+  box-shadow:0 28px 70px #0007;
+}
+@media(max-width:650px){
+  .about-visual--approved .approved-story-image{width:100%;height:auto;border-radius:12px}
+}
