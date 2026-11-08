@@ -80,6 +80,8 @@
       <input id="event-date" type="date" required>
       <p class="hint">Dodaj samo potrjene rezervacije. Povpraševanje še ne pomeni zasedenega termina.</p>
       <div class="row"><button id="book" type="button">OZNAČI KOT ZASEDENO</button><button id="release" class="secondary" type="button">SPROSTI DATUM</button></div>
+      <button id="calendar-diagnostics" class="secondary" type="button" style="width:100%;margin-top:12px">PREVERI POVEZAVO S KOLEDARJEM</button>
+      <p class="hint">Preverjanje ne spreminja rezervacij in ne prikazuje skrivnih vrednosti.</p>
     </section>
     <section class="card">
       <div class="row"><h2>Varnostna kopija</h2></div>
@@ -133,7 +135,7 @@
   }
   function setBusy(value){
     busy=value;
-    ['sign-in','book','release','refresh','backup'].forEach(id=>el(id).disabled=value);
+    ['sign-in','book','release','refresh','backup','calendar-diagnostics'].forEach(id=>el(id).disabled=value);
   }
   async function refresh(){
     const data=await call('list');
@@ -204,6 +206,18 @@
     }
   }));
   el('refresh').addEventListener('click',()=>run(async()=>{await refresh();notice('Seznam je osvežen.',true)}));
+  el('calendar-diagnostics').addEventListener('click',()=>run(async()=>{
+    const data=await call('calendar_diagnostics');
+    const flags=data.calendar||{};
+    const verdict=[
+      'Sinhronizacija: '+(flags.enabled?'VKLOPLJENA':'IZKLOPLJENA'),
+      'BOOKING_CALENDAR_BRIDGE_TOKEN: '+(!flags.token_present?'MANJKA':flags.token_format_valid?'VELJAVNA DOLŽINA':'PREKRATEK KLJUČ'),
+      'BOOKING_CALENDAR_APPS_SCRIPT_URL: '+(!flags.url_present?'MANJKA':flags.url_format_valid?'PRAVILNA OBLIKA':'NAPAČEN FORMAT URL (preveri /exec, brez presledkov)')
+    ];
+    const okay=flags.enabled&&flags.token_format_valid&&flags.url_format_valid;
+    verdict.push(okay?'Oblika nastavitev je pravilna. To še ne preveri dostopa do Googla.':'Popravi navedene nastavitve v Cloudflare, shrani in Deploy.');
+    notice(verdict.join('\\n'),okay);
+  }));
   el('book').addEventListener('click',()=>change('book',dateField.value));
   el('release').addEventListener('click',()=>change('release',dateField.value));
   el('make-key').addEventListener('click',()=>{

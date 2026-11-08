@@ -227,6 +227,24 @@ async function managePrivateDates(request, env) {
     if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
       return reply({ error: "invalid_request" }, 400);
     }
+    if (payload.action === "calendar_diagnostics") {
+      // Admin-authenticated, read-only checks. Never return secret values,
+      // complete URLs, token lengths, or masked excerpts.
+      const secret = env.BOOKING_CALENDAR_BRIDGE_TOKEN;
+      const scriptUrl = env.BOOKING_CALENDAR_APPS_SCRIPT_URL;
+      return reply({
+        status: "ok",
+        calendar: {
+          enabled: env.BOOKING_CALENDAR_SYNC_ENABLED === "true",
+          token_present: typeof secret === "string" && secret.length > 0,
+          token_format_valid: typeof secret === "string" && secret.length >= 32,
+          url_present: typeof scriptUrl === "string" && scriptUrl.length > 0,
+          url_format_valid: typeof scriptUrl === "string" &&
+            /^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(scriptUrl)
+        }
+      });
+    }
+
     const today = currentDateInSlovenia();
     const end = new Date(today + "T00:00:00Z");
     end.setUTCFullYear(end.getUTCFullYear() + 2);
