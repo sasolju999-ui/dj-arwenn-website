@@ -145,6 +145,43 @@ async function recordInvalidAdminAttempt(db, hashedIp) {
   return Boolean(row && row.hits > 10);
 }
 
+
+/**
+ * Optional, server-to-server sync to Google Apps Script.
+ * A booking is committed in D1 first. Calendar failure is reported separately,
+ * never interpreted as a failed booking. Disabled unless explicitly configured.
+ */
+async function syncBookingCalendar(date, env) {
+  if (env.BOOKING_CALENDAR_SYNC_ENABLED !== "true") return "disabled";
+  if (typeof env.BOOKING_CALENDAR_BRIDGE_TOKEN !== "string" ||
+      env.BOOKING_CALENDAR_BRIDGE_TOKEN.length < 32 ||
+      typeof env.BOOKING_CALENDAR_APPS_SCRIPT_URL !== "string" ||
+      !/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(env.BOOKING_CALENDAR_APPS_SCRIPT_URL)) {
+    return "not_configured";
+  }
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 12000);
+  try {
+    const response = await fetch(env.BOOKING_CALENDAR_APPS_SCRIPT_URL, {
+      method: "POST",
+      redirect: "follow",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        token: env.BOOKING_CALENDAR_BRIDGE_TOKEN,
+        action: "book",
+        date
+      }),
+      signal: controller.signal
+    });
+    const result = response.ok ? await response.json().catch(() => null) : null;
+    return result && result.ok === true ? "ok" : "pending";
+  } catch (_) {
+    return "pending";
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function managePrivateDates(request, env) {
   if (request.method !== "POST") return reply({ error: "method_not_allowed" }, 405);
   if (!env.DB || typeof env.DJ_ARWENN_ADMIN_TOKEN !== "string" ||
@@ -236,7 +273,13 @@ async function managePrivateDates(request, env) {
       : "DELETE FROM booked_dates WHERE date = ?";
     const update = await env.DB.prepare(query).bind(date).run();
     if (!update.success) throw new Error("D1 update was unsuccessful");
-    return reply({ status: "ok", date, action: payload.action });
+    // Only an explicitly approved booking is eligible for automatic creation.
+    // Re-booking an existing date safely retries pending calendar sync.
+    // Releasing dates never deletes calendar entries without human review.
+    const calendarSync = payload.action === "book"
+      ? await syncBookingCalendar(date, env)
+      : "manual_review";
+    return reply({ status: "ok", date, action: payload.action, calendar_sync: calendarSync });
   } catch (error) {
     console.error("Private date management failed:", error?.name || "unknown");
     return reply({ error: "unavailable" }, 503);
