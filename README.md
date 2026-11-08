@@ -177,3 +177,47 @@ The `pages-alias/` folder is a **separate Pages project** with an advanced-mode 
 
 Never enable Pages automatic deployment from the repository root's primary Worker settings, and never change the existing `wrangler.jsonc` deployment command to deploy `pages-alias`. The folder-based Pages integration is separate. Do not paste private Cloudflare secrets into Pages, GitHub, or chat.
 
+
+
+## Optional booking → Google Calendar sync (not active by default)
+
+The admin's **OZNAČI KOT ZASEDENO** button now supports an optional server-side
+Google Apps Script calendar bridge. The private D1 booking is always committed
+before calling Google. A failed/disabled Google sync **does not undo the booking**
+and is shown in the admin panel; clicking BOOK again retries safely.
+
+### Required activation (manual; do not share any secrets)
+
+1. In [Google Apps Script](https://script.google.com), create a **separate**
+   standalone project under Sašo's account. Paste
+   `integrations/apps-script-calendar.gs` as its code. Set its project
+   timezone to **Europe/Ljubljana**.
+2. Create a new, independent 48+ character random token in a password manager.
+   Put it in Apps Script **Script Properties** named
+   `BOOKING_CALENDAR_BRIDGE_TOKEN`. Never use the admin key or salt.
+3. Deploy a **Web app**, execute as **Me**, accessible to **Anyone**. The endpoint
+   is guarded by the independent token (do not put it into the URL). Copy the
+   deployment URL ending with `/exec`.
+4. In the Cloudflare Worker, set encrypted Secrets
+   `BOOKING_CALENDAR_BRIDGE_TOKEN` (same token) and
+   `BOOKING_CALENDAR_APPS_SCRIPT_URL` (the /exec URL).
+   Set `BOOKING_CALENDAR_SYNC_ENABLED` to `true` **only after** testing.
+5. Back up D1; verify the four previously confirmed dates in both calendars:
+   2026-11-14, 2026-12-05, 2026-12-19, 2027-01-16. The bridge checks for
+   same-day DJ Arwenn events, including these manual entries, before creating.
+   Never run a live test on an unconfirmed date.
+6. With a *genuinely new confirmed booking*, use the existing admin button.
+   Expect the admin panel to report D1 saved and calendar sync confirmed.
+   Verify the event and Lara's guest invitation in Google Calendar. Use
+   the original admin UI as fallback if the bridge is unavailable.
+
+**Safety boundaries:** The bridge is off by default. Only admin-authorized
+`book` actions trigger it; public enquiries do not. Existing same-day DJ
+events remain untouched. Calendar deletion on `release` is deliberately
+**manual** to avoid deleting other personal or manual events. The site admin
+displays a reminder to check Google Calendar after release. A one-day
+reservation is created as an all-day busy event because the exact start time
+is unknown (usually after 16:00). The Google endpoint uses the owner's
+Google Calendar OAuth authorization; it is not automatically authorized by
+connecting Calendar in ChatGPT. The Google Apps Script endpoint itself must be
+deployed manually, and this PR alone does NOT activate the integration.
