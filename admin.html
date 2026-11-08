@@ -161,9 +161,16 @@
     if(action==='release'&&!confirm('Res želiš sprostiti '+fmt(date)+'?'))return;
     if(action==='book'&&!confirm('Označim '+fmt(date)+' kot ZASEDENO? To blokira nova povpraševanja za ta datum.'))return;
     await run(async()=>{
-      await call(action,date);
+      const data=await call(action,date);
       await refresh();
-      notice(action==='book'?'Datum '+fmt(date)+' je označen kot zaseden.':'Datum '+fmt(date)+' je ponovno sproščen.',true);
+      if(action==='release'){
+        notice('Datum '+fmt(date)+' je sproščen v bazi. PREVERI tudi Google Koledar: dogodek se zaradi varnosti ne izbriše samodejno.',true);
+      }else if(data.calendar_sync==='ok'){
+        notice('Datum '+fmt(date)+' je zaseden v D1 in sinhroniziran z Google Koledarjem.',true);
+      }else{
+        const tip=data.calendar_sync==='disabled'?'Povezava s koledarjem še ni aktivirana.':data.calendar_sync==='not_configured'?'Povezava s koledarjem ni pravilno nastavljena.':'Samodejni vpis v koledar ni potrjen.';
+        notice('Datum '+fmt(date)+' je varno označen kot zaseden v D1. '+tip+' Preveri Google Koledar; za ponovni poskus klikni ponovno OZNAČI KOT ZASEDENO.',true);
+      }
     });
   }
   el('admin-login-form').addEventListener('submit',(event)=>{
