@@ -302,3 +302,61 @@ zaradi izklopa povezave.
   zaščite pred zunanjimi neposrednimi kontaktiranji ali rezervacijami.
 - Nazive uporabniških rezervacij je treba voditi dosledno. Dogodek s
   prostim opisom brez predpisanega naslova ne bo samodejno zaprl datuma.
+
+
+## DJ Arwenn – Booking Assistant v2 (owner-only, opt-in upgrade to Apps Script)
+
+This adds three **private** protections without affecting public availability rules:
+- The owner-only date assessment now counts ordinary personal commitments ending
+  by 15:00, continuing past 15:00, and all-day entries separately. Week A/B
+  prediction stays **unconfirmed**, with shifts 07:30–14:10 morning / 13:30–20:10
+  afternoon; a morning shift does not automatically block an evening DJ job,
+  and an afternoon shift is a possible **shift-swap**, not an automatic rejection.
+  Calendar event titles, locations, notes and guest details never leave Apps
+  Script; only integer counts do.
+- Owner-only **31-day consistency audit** (starting on the chosen date) compares
+  D1 bookings against DJ-specific calendar events. It flags calendar-only gigs
+  and D1 dates missing a matching DJ event; vacation blocks are treated as
+  valid blocks. No bookings are changed. The audit runs **on demand** via the
+  private button, not on a background schedule; weekly automated notification
+  would be a separate, expressly enabled capability.
+- **Safe cancellation:** the existing private Release action first checks the
+  calendar. The bridge can delete only a **single** DJ booking that was
+  created by Apps Script v2 and whose ID is recorded in private ScriptProperties
+  for that date. The event also carries a version marker in its description.
+  A manually created DJ event, an older pre-v2 event, a vacation closure,
+  duplicate events, an unavailable Calendar or any other ambiguity results in
+  `manual_review`; the D1 date stays booked. Only after confirmed calendar
+  clearance can D1 be released. Cancellation of events stored **only** in
+  Google Calendar must be done through Calendar after owner verification.
+  The script never deletes other personal events or Lara's events.
+  **Do not simply click Release to open a calendar-only booked date.**
+
+### Required final activation for v2
+
+1. Review and merge the v2 PR. The GitHub-connected
+   `dj-arwenn-website` Worker should deploy the updated private admin UI.
+2. In the EXISTING Google Apps Script project `DJ Arwenn – Calendar Bridge`,
+   replace `Code.gs` with `integrations/apps-script-calendar.gs` from **main**
+   and save. Under **Manage deployments**, edit the same second active
+   `Untitled` Web App deployment previously on **Version 5**; choose
+   **New version → Deploy**. Never create a new deployment URL or change
+   the bridge token/URL.
+3. Owner-only `/admin.html`: test read-only assessment for known D1 booked
+   and calendar-only dates. Then run the read-only 31-day audit. If the
+   Google bridge returns `NI PREVERJENO` or audit unavailable, stop and
+   inspect Apps Script Executions; do not delete or release records.
+4. Cancel safety must be validated in a **new, explicitly approved test D1
+   booking** only. Existing bookings predate v2 and MUST remain untouched;
+   do not use a real booked date as a test case. On future v2-created bookings,
+   cancellation should delete the bridge-owned event before removing D1.
+   Reopen public availability only after a fresh check and no remaining
+   Calendar block.
+5. No new Cloudflare secret, variable or D1 migration is required. Existing
+   `BOOKING_CALENDAR_REVERSE_SYNC_ENABLED=true` remains intact. Do not
+   touch project `djarwenn` Worker or Pages alias `djarwenn.pages.dev`.
+
+**Rollback:** The v2 code never performs a bulk deletion. If the new Apps
+Script isn't deployed, the new private functions return unverified, and
+safety checks refuse destructive releases. Existing public availability
+and booking-to-calendar behavior remain unchanged.
