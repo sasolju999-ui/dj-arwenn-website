@@ -14,8 +14,8 @@
   const messages = {
     booked: ['TERMIN JE ŽE ZASEDEN. Za ta datum ne sprejemam novih rezervacij. Izberi drug datum.', 'DATE ALREADY BOOKED. I am not accepting new bookings for this date. Please choose another date.'],
     enquiries_open: ['TERMIN JE PREDVIDOMA PROST. Za ta datum sprejemam povpraševanja. Rezervacijo dokončno potrdim osebno.', 'DATE APPEARS AVAILABLE. I am accepting enquiries for this date. I will confirm the booking personally.'],
-    unknown: ['Termina trenutno ni mogoče samodejno preveriti. Pošlji povpraševanje in odgovorim osebno.', 'Automatic date checking is currently unavailable. Send an enquiry and I will reply personally.'],
-    rate_limited: ['Preveč preverjanj v kratkem času. Poskusi pozneje ali pošlji povpraševanje.', 'Too many date checks. Please try again later or send an enquiry.'],
+    unknown: ['Termina trenutno ni mogoče samodejno preveriti. Poskusi pozneje ali mi piši prek Messengerja.', 'Automatic date checking is currently unavailable. Try again later or contact me via Messenger.'],
+    rate_limited: ['Preveč preverjanj v kratkem času. Poskusi pozneje ali mi piši prek Messengerja.', 'Too many date checks. Please try again later or contact me via Messenger.'],
     loading: ['PREVERJAM ...', 'CHECKING ...'],
     button: ['PREVERI TERMIN', 'CHECK DATE']
   };
@@ -35,14 +35,15 @@
     result.hidden = false;
     result.dataset.status = status;
     result.textContent = label(status);
-    continueLink.hidden = status === 'booked';
-    if (status !== 'booked' && selectedDate) formDate.value = selectedDate;
+    continueLink.hidden = status !== 'enquiries_open';
+    if (status === 'enquiries_open' && selectedDate) formDate.value = selectedDate;
   }
 
-  async function lookup(date) {
+  async function lookup(date, options = {}) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return 'unknown';
     const saved = cache.get(date);
-    if (saved && Date.now() < saved.until) return saved.status;
+    // Form submission requires a fresh check, not the 45-second UI cache.
+    if (!options.fresh && saved && Date.now() < saved.until) return saved.status;
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10000);
     try {
