@@ -235,6 +235,8 @@
       'Predvidena izmena: '+shift,
       'Službeni urnik: NI POTRJEN za ta dan (prosta sobota/menjave niso samodejno znane)',
       'Prosta sobota: '+(cal.state!=='ok'?'NI PREVERJENA':cal.free_saturday?'Izrecno označena v koledarju':'Ni potrditve'),
+      'Koledarska zapora: '+(cal.state!=='ok'?'NI PREVERJENA':cal.booking_block?'DA – rezervacija ali izrecna zapora':'NE'),
+      'Povratna povezava za spletno stran: '+(data.calendar_reverse==='disabled'?'Še ni vklopljena':data.calendar_reverse==='blocked'?'DATUM ZAPRT':data.calendar_reverse==='open'?'Brez koledarske zapore':'NAPAKA – NEPREVERJENO'),
       'Drugi vpisi v koledarju: '+(cal.state==='ok'?cal.other_count:'NI PREVERJENO – Apps Script je lahko še na stari različici'),
       'Dopust, osebne obveznosti in menjave: preveri pred potrditvijo.'
     ];

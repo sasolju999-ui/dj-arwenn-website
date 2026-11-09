@@ -228,3 +228,77 @@ deployed manually, and this PR alone does NOT activate the integration.
 V skrbniski strani `/admin.html` je na voljo gumb **PREVERI TERMIN (BREZ SPREMEMB)**. Po prijavi uporabi D1 za stanje potrjenih rezervacij in 14-dnevni izmenski cikel za **predvideno** izmeno. Ce je Apps Script posodobljen, dobi se anonimni povzetek: stevilo drugih koledarskih vpisov, obstoj DJ dogodka in oznako `Saso - prosta sobota`, ce je uporabnik ta dan rocno potrdil. Ne vraca imen dogodkov, opomb, gostov ali lokacij. Drugih vpisov ne obravnava kot samodejno prepoved nastopa.
 
 Za aktivacijo koledarskega dela v obstojecem projektu Google Apps Script **DJ Arwenn – Calendar Bridge** posodobi `integrations/apps-script-calendar.gs` in izdaj **novo razlicico iste spletne aplikacije** (Manage deployments -> Edit -> New version -> Deploy). Nastavitev kljucev ni treba spreminjati. Dokler Apps Script ni posodobljen, preverjanje vrne `NI PREVERJENO`, nikoli `prosto`. Javni obrazec ter postopek zapisa/izbrisa potrjenih DJ rezervacij ostajata nespremenjena. Predvidena izmena ni potrjen sluzbeni urnik. Poletna zapora povprasevanj in evidenca menjav sta loceni prihodnji funkciji, ne del te prve verzije.
+
+
+## Povratna sinhronizacija: Google Koledar → spletna stran (v2, opt-in)
+
+**Namen:** Ko uporabnik Arii pove za **potrjen** nastop po telefonu/Facebooku,
+Aria ustvari v skupnem Sašovem Google Koledarju dogodek z naslovom
+`🎧 DJ Arwenn – rezerviran nastop`. Na spletni strani se ta dan samodejno
+prikaže kot **zaseden** in spletni obrazec v običajnem Turnstile načinu zavrne
+povpraševanje za ta datum. Podobno deluje celodnevni večdnevni dogodek
+`🔒 DJ Arwenn – zapora rezervacij` za **izrecno** zaprto obdobje dopusta.
+Navadni dopusti, proste sobote, izmene in druga osebna opravila **NE** zaprejo
+rezervacij.
+
+### Kako tehnično deluje
+
+- D1 `booked_dates` ostaja nespremenjen in ima prednost (že potrjen datum je
+  vedno zaseden), Cloudflare pa dodatno prek obstoječega zaščitenega
+  Apps Script bridge preveri **samo izbrani datum** v Google Koledarju.
+- Branje je sprotno ob poizvedbi, brez nove tabele, skrivnosti ali časovnih
+  sprožilcev. **Ne kopira** koledarskega dogodka fizično v D1.
+- Nova skripta vrača le boolean `blocked` in ne razkriva razloga, naslova,
+  lokacije, gostov, zdravnika ali drugih osebnih podatkov obiskovalcu.
+- Ko je povratna povezava vklopljena in Apps Script ne odgovori, je javno
+  preverjanje `unknown` (ne `enquiries_open`); strežniška pošta ne odide
+  za nepreverjen datum. To prepreči lažno razpoložljivost, lahko pa zaradi
+  Googlovega izpada začasno ustavi obrazec. Stranka lahko kontaktira DJ-ja
+  po Messengerju. Običajni hCaptcha/Web3Forms fallback ostane samostojna
+  alternativa in nima strežniške blokade: za strogo zapiranje je potrebna
+  razpoložljiva nova Turnstile povezava.
+- Spremembe v koledarju pri naslednjem preverjanju spremenijo stanje;
+  brskalnik lahko ohrani prejšnji rezultat do **45 sekund**. Ne obljubljaj
+  takojšnjega zaprtja brez uspešnega javnega preverjanja.
+
+### Varna aktivacija (enkrat)
+
+1. Preglej/združi PR in objavi **samo pravilni** Worker
+   `dj-arwenn-website`; nova funkcija ostane **IZKLOPLJENA**.
+2. V **obstoječem** Apps Script projektu `DJ Arwenn – Calendar Bridge`
+   posodobi `Code.gs` iz `integrations/apps-script-calendar.gs`.
+   V **Deploy > Manage deployments** nadgradi **isti spletni deployment**, ki
+   ga Cloudflare že kliče (prej je bil to *drugi aktivni Untitled*, Version 4),
+   z izbiro **New version**. URL in skriptne lastnosti ostanejo enaki.
+3. V zasebnem `/admin.html` preveri že potrjen DJ datum. Nova vrstica
+   »Koledarska zapora« mora pokazati **DA**.
+4. ŠELE POTEM v Cloudflare `dj-arwenn-website` > Production > Variables
+   nastavi **navadno besedilno spremenljivko** (NE Secret!)
+   `BOOKING_CALENDAR_REVERSE_SYNC_ENABLED` na `true` in shrani/deploy.
+   Obstoječih skrivnih ključev, D1 povezave ali URL-ja ne spreminjaj.
+   Ne nastavi te spremenljivke v ločenem projektu `djarwenn`.
+5. V `/admin.html` preveri že rezerviran datum:
+   »Povratna povezava za spletno stran: DATUM ZAPRT«.
+   Za javni test uporabi potrjen koledarski dogodek, ki NI v D1, vendar ga
+   ne ustvarjaj po nepotrebnem na dejanskem razpoložljivem datumu.
+   Preden obljubiš uspeh, preveri tudi javni `/api/availability` s
+   koledarsko zaprtim datumom in preveri, da spletni obrazec ne pošlje
+   povpraševanja. Brez preverjanja aktivacija še ni potrjena.
+
+### Povrnitev brez izgube podatkov
+
+V Cloudflare nastavi `BOOKING_CALENDAR_REVERSE_SYNC_ENABLED=false`.
+S tem je javna stran takoj nazaj na prvotnem preverjanju samo D1.
+Ker ni migracije, D1 zapisov ali brisanja dogodkov, ostanejo podatki
+nedotaknjeni. **Ne briši** koledarskih nastopov ali D1 datumov zgolj
+zaradi izklopa povezave.
+
+### Meje
+
+- To je **obratno preverjanje razpoložljivosti**, ne dvosmerno urejanje D1.
+- `booked_dates` se še vedno upravlja ročno/prek skrbniškega API-ja.
+  Če datum ostane v D1, samo brisanje koledarskega dogodka ne odpre datuma.
+- Neuspeh branja blokira običajno javno preverjanje; ne jamči popolne
+  zaščite pred zunanjimi neposrednimi kontaktiranji ali rezervacijami.
+- Nazive uporabniških rezervacij je treba voditi dosledno. Dogodek s
+  prostim opisom brez predpisanega naslova ne bo samodejno zaprl datuma.
