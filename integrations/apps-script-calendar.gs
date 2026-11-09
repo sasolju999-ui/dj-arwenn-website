@@ -9,7 +9,8 @@
  *
  * Creates only explicitly owner-confirmed all-day bookings.
  * Existing same-day DJ Arwenn events are left untouched to avoid duplicates.
- * It intentionally does NOT delete or release calendar events.
+ * Cancellation deletes ONLY exactly one verified bridge-managed v2 event.
+ * Older/manual bookings require human review and are never deleted automatically.
  * New action "availability" returns only whether an explicitly named
  * Calendar event blocks the date, never personal event details.
  */
@@ -27,6 +28,70 @@ function bookingBlockKind_(events) {
     if (/^\s*(?:🔒\s*)?DJ Arwenn\s*[–-]\s*zapora rezervacij(?:\s|$|[(:–-])/i.test(title)) closed = true;
   }
   return closed ? 'closed' : booked ? 'dj' : '';
+}
+
+
+/** Versioned proof that this script created the event, not a human. */
+var DJ_BRIDGE_MARKER_V2_ = '[DJ_ARWENN_BRIDGE_MANAGED_V2]';
+
+function djBookingTitle_(title) {
+  return /^\s*(?:🎧\s*)?DJ Arwenn\s*[–-]\s*rezerviran nastop(?:\s|$|[(:–-])/i.test(String(title || ''));
+}
+function djClosureTitle_(title) {
+  return /^\s*(?:🔒\s*)?DJ Arwenn\s*[–-]\s*zapora rezervacij(?:\s|$|[(:–-])/i.test(String(title || ''));
+}
+function localDate_(value) {
+  var p = value.split('-').map(Number);
+  return new Date(p[0], p[1] - 1, p[2]);
+}
+function isoDay_(date) {
+  return Utilities.formatDate(date, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+}
+function dateParts_(value) {
+  var p = value.split('-').map(Number);
+  return new Date(p[0], p[1] - 1, p[2], 12);
+}
+function auditDates_(first, days) {
+  var start = localDate_(first);
+  var end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + days);
+  var events = CalendarApp.getDefaultCalendar().getEvents(start, end);
+  var dates = [];
+  for (var i = 0; i < days; i++) {
+    var day = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+    var next = new Date(day.getFullYear(), day.getMonth(), day.getDate() + 1);
+    var dj = false, closed = false;
+    for (var j = 0; j < events.length; j++) {
+      var item = events[j];
+      if (!(item.getStartTime() < next && item.getEndTime() > day)) continue;
+      var title = item.getTitle();
+      if (djBookingTitle_(title)) dj = true;
+      if (djClosureTitle_(title)) closed = true;
+    }
+    dates.push({date: isoDay_(day), dj: dj, closed: closed});
+  }
+  return dates;
+}
+function personalTiming_(events, day) {
+  var otherCount = 0, before = 0, after = 0, allDay = 0;
+  var cutoff = new Date(day.getFullYear(), day.getMonth(), day.getDate(), 15);
+  var freeSaturday = false;
+  for (var j = 0; j < events.length; j++) {
+    var item = events[j], title = item.getTitle();
+    if (/DJ Arwenn/i.test(title)) continue;
+    if (/Sašo\s*[–-]\s*(dopoldanska|popoldanska)/i.test(title) ||
+        /Lara\s*[–-]\s*(dopoldanska|popoldanska)/i.test(title)) continue;
+    if (/Sašo\s*[–-]\s*prosta sobota/i.test(title)) {
+      freeSaturday = true;
+      continue;
+    }
+    otherCount++;
+    if (item.isAllDayEvent()) allDay++;
+    else if (item.getEndTime() > cutoff) after++;
+    else before++;
+  }
+  return {other_count: Math.min(otherCount,1000), before_15: Math.min(before,1000),
+          after_15: Math.min(after,1000), all_day: Math.min(allDay,1000),
+          free_saturday: freeSaturday};
 }
 
 function doPost(e) {
@@ -57,6 +122,22 @@ function doPost(e) {
     }
   }
 
+  if (body.action === 'audit') {
+    // Private per-day booleans only, bounded to 31 days. No event titles.
+    if (!Number.isInteger(body.days) || body.days < 1 || body.days > 31) {
+      return output_(false, 'invalid_range');
+    }
+    try {
+      var results = auditDates_(body.date, body.days);
+      return ContentService.createTextOutput(JSON.stringify({
+        ok: true, status: 'audit', days: results
+      })).setMimeType(ContentService.MimeType.JSON);
+    } catch (_) {
+      console.error('Private booking audit unavailable; no details logged');
+      return output_(false, 'calendar_unavailable');
+    }
+  }
+
   if (body.action === 'assess') {
     // Read ONLY the single owner's shared calendar. Never send event contents
     // (names, notes, guests, medical details or location) to the Worker.
@@ -64,22 +145,17 @@ function doPost(e) {
     var checkDay = new Date(parts[0], parts[1] - 1, parts[2], 12);
     try {
       var events = CalendarApp.getDefaultCalendar().getEventsForDay(checkDay);
-      var otherCount = 0, djEvent = false, freeSaturday = false;
+      var personal = personalTiming_(events, checkDay);
+      var djEvent = false;
       for (var j = 0; j < events.length; j++) {
-        var title = events[j].getTitle();
-        if (/DJ Arwenn/i.test(title)) { djEvent = true; continue; }
-        if (/Sašo\s*[–-]\s*(dopoldanska|popoldanska)/i.test(title) ||
-            /Lara\s*[–-]\s*(dopoldanska|popoldanska)/i.test(title)) continue;
-        if (/Sašo\s*[–-]\s*prosta sobota/i.test(title)) {
-          freeSaturday = true;
-          continue;
-        }
-        otherCount++;
+        if (djBookingTitle_(events[j].getTitle())) djEvent = true;
       }
       return ContentService.createTextOutput(JSON.stringify({
         ok: true, status: 'assessment',
-        other_count: Math.min(otherCount, 1000),
-        dj_event: djEvent, free_saturday: freeSaturday,
+        other_count: personal.other_count,
+        before_15: personal.before_15, after_15: personal.after_15,
+        all_day: personal.all_day,
+        dj_event: djEvent, free_saturday: personal.free_saturday,
         booking_block: bookingBlockKind_(events) !== ''
       })).setMimeType(ContentService.MimeType.JSON);
     } catch (_) {
@@ -87,7 +163,7 @@ function doPost(e) {
       return output_(false, 'calendar_unavailable');
     }
   }
-  if (body.action !== 'book') return output_(false, 'invalid_action');
+  if (body.action !== 'book' && body.action !== 'cancel') return output_(false, 'invalid_action');
 
   var lock = LockService.getScriptLock();
   if (!lock.tryLock(10000)) return output_(false, 'busy');
@@ -98,6 +174,31 @@ function doPost(e) {
     var day = new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0);
     var calendar = CalendarApp.getDefaultCalendar();
     var existing = calendar.getEventsForDay(day);
+    if (body.action === 'cancel') {
+      // Never delete human-created events. Existing pre-v2 calendar bookings
+      // require human review because their provenance cannot be established.
+      var managed = [];
+      var allDjBookings = 0;
+      for (var k = 0; k < existing.length; k++) {
+        var item = existing[k], title = item.getTitle();
+        if (djClosureTitle_(title)) return output_(false, 'manual_review');
+        if (!djBookingTitle_(title)) continue;
+        allDjBookings++;
+        if (item.isAllDayEvent() &&
+            String(item.getDescription() || '').indexOf(DJ_BRIDGE_MARKER_V2_) !== -1) {
+          managed.push(item);
+        }
+      }
+      if (allDjBookings > 0 && (allDjBookings !== 1 || managed.length !== 1)) {
+        return output_(false, 'manual_review');
+      }
+      if (managed.length === 1) managed[0].deleteEvent();
+      // Re-read after mutation. D1 is released only if no Calendar block remains.
+      var after = calendar.getEventsForDay(day);
+      if (bookingBlockKind_(after) !== '') return output_(false, 'manual_review');
+      return output_(true, managed.length === 1 ? 'cancelled' : 'clear');
+    }
+
     for (var i = 0; i < existing.length; i++) {
       // Do not adopt, modify, or duplicate manually created DJ events.
       if (/DJ Arwenn/i.test(existing[i].getTitle())) return output_(true, 'already_exists');
@@ -106,7 +207,7 @@ function doPost(e) {
       '🎧 DJ Arwenn – rezerviran nastop',
       day,
       {
-        description: 'Potrjena zasedenost DJ Arwenn. Ura in kraj se dopolnita pozneje. Nastop praviloma po 16:00.',
+        description: 'Potrjena zasedenost DJ Arwenn. Ura in kraj se dopolnita pozneje. Nastop praviloma po 16:00.\n' + DJ_BRIDGE_MARKER_V2_,
         guests: 'larapececnik@gmail.com',
         sendInvites: true
       }
