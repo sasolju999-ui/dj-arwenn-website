@@ -61,6 +61,49 @@ async function withinRateLimit(db, hashedIp) {
   return true;
 }
 
+
+/**
+ * Optional live Calendar -> website block check.
+ * Activated ONLY after the updated Apps Script is deployed and
+ * BOOKING_CALENDAR_REVERSE_SYNC_ENABLED="true" is set in Cloudflare.
+ * No D1 writes and no personal event details returned.
+ */
+async function calendarBookingState(date, env) {
+  if (env.BOOKING_CALENDAR_REVERSE_SYNC_ENABLED !== "true") {
+    return { state: "disabled" };
+  }
+  if (env.BOOKING_CALENDAR_SYNC_ENABLED !== "true" ||
+      typeof env.BOOKING_CALENDAR_BRIDGE_TOKEN !== "string" ||
+      env.BOOKING_CALENDAR_BRIDGE_TOKEN.length < 32 ||
+      typeof env.BOOKING_CALENDAR_APPS_SCRIPT_URL !== "string" ||
+      !/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(env.BOOKING_CALENDAR_APPS_SCRIPT_URL)) {
+    return { state: "unavailable" };
+  }
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 7500);
+  try {
+    const response = await fetch(env.BOOKING_CALENDAR_APPS_SCRIPT_URL, {
+      method: "POST",
+      redirect: "follow",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        token: env.BOOKING_CALENDAR_BRIDGE_TOKEN, action: "availability", date
+      }),
+      signal: controller.signal
+    });
+    const data = response.ok ? await response.json().catch(() => null) : null;
+    if (data && data.ok === true && data.status === "availability" &&
+        typeof data.blocked === "boolean") {
+      return { state: data.blocked ? "blocked" : "open" };
+    }
+  } catch (_) {
+    // Deliberately never return "open" on a bridge failure.
+  } finally {
+    clearTimeout(timer);
+  }
+  return { state: "unavailable" };
+}
+
 async function checkAvailability(request, env) {
   if (request.method !== "POST") {
     return reply({ status: "unknown", message: "Use POST." }, 405);
@@ -107,7 +150,13 @@ async function checkAvailability(request, env) {
     const occupied = await env.DB.prepare(
       "SELECT date FROM booked_dates WHERE date = ? LIMIT 1"
     ).bind(date).first();
-    return reply({ status: occupied ? "booked" : "enquiries_open" });
+    if (occupied) return reply({ status: "booked" });
+    const calendar = await calendarBookingState(date, env);
+    if (calendar.state === "blocked") return reply({ status: "booked" });
+    if (calendar.state === "unavailable") {
+      return reply({ status: "unknown", reason: "calendar_unavailable" }, 503);
+    }
+    return reply({ status: "enquiries_open" });
   } catch (error) {
     // Avoid exposing details of private infrastructure to visitors.
     console.error("Availability lookup failed:", error?.name || "unknown");
@@ -211,12 +260,14 @@ async function assessBookingDate(date, env) {
           Number.isSafeInteger(data.other_count) &&
           data.other_count >= 0 && data.other_count <= 1000 &&
           typeof data.dj_event === "boolean" &&
-          typeof data.free_saturday === "boolean") {
+          typeof data.free_saturday === "boolean" &&
+          typeof data.booking_block === "boolean") {
         calendar = {
           state: "ok",
           other_count: data.other_count,
           dj_event: data.dj_event,
-          free_saturday: data.free_saturday
+          free_saturday: data.free_saturday,
+          booking_block: data.booking_block
         };
       }
     } catch (_) {
@@ -314,10 +365,13 @@ async function managePrivateDates(request, env) {
       const booking = await env.DB.prepare(
         "SELECT date FROM booked_dates WHERE date = ? LIMIT 1"
       ).bind(date).first();
+      const [assessment, reverseCheck] = await Promise.all([
+        assessBookingDate(date, env), calendarBookingState(date, env)
+      ]);
       return reply({
         status: "ok", date,
         booking: booking ? "booked" : "not_booked",
-        ...(await assessBookingDate(date, env))
+        ...assessment, calendar_reverse: reverseCheck.state
       });
     }
 
@@ -518,6 +572,14 @@ async function sendTurnstileEnquiry(request, env) {
     if (!verification || verification.success !== true ||
         verification.hostname !== url.hostname || verification.action !== "dj_enquiry") {
       return reply({ error: "verification_required" }, 403);
+    }
+
+    // Never send an enquiry for a Calendar-blocked day. A failed bridge
+    // must not be treated as a free date when reverse sync is enabled.
+    const calendar = await calendarBookingState(eventDate, env);
+    if (calendar.state === "blocked") return reply({ error: "booked" }, 409);
+    if (calendar.state === "unavailable") {
+      return reply({ error: "availability_unverified" }, 503);
     }
 
     // Apps Script sends a message from the owner's Google account to their inbox.
