@@ -10,7 +10,25 @@
  * Creates only explicitly owner-confirmed all-day bookings.
  * Existing same-day DJ Arwenn events are left untouched to avoid duplicates.
  * It intentionally does NOT delete or release calendar events.
+ * New action "availability" returns only whether an explicitly named
+ * Calendar event blocks the date, never personal event details.
  */
+
+/**
+ * Only explicitly confirmed DJ bookings or intentionally closed booking
+ * periods are website blocks. Never block for regular annual leave, Lara's
+ * birthday, free Saturdays, work shifts, DJ marketing reminders, etc.
+ */
+function bookingBlockKind_(events) {
+  var booked = false, closed = false;
+  for (var i = 0; i < events.length; i++) {
+    var title = String(events[i].getTitle() || '');
+    if (/^\s*(?:🎧\s*)?DJ Arwenn\s*[–-]\s*rezerviran nastop(?:\s|$|[(:–-])/i.test(title)) booked = true;
+    if (/^\s*(?:🔒\s*)?DJ Arwenn\s*[–-]\s*zapora rezervacij(?:\s|$|[(:–-])/i.test(title)) closed = true;
+  }
+  return closed ? 'closed' : booked ? 'dj' : '';
+}
+
 function doPost(e) {
   var props = PropertiesService.getScriptProperties();
   var expected = props.getProperty('BOOKING_CALENDAR_BRIDGE_TOKEN');
@@ -22,6 +40,22 @@ function doPost(e) {
   if (!body || typeof body !== 'object' ||
       !equals_(String(body.token || ''), expected)) return output_(false, 'forbidden');
   if (!dateValid_(body.date)) return output_(false, 'invalid_date');
+
+
+  if (body.action === 'availability') {
+    try {
+      var bits = body.date.split('-').map(Number);
+      var day = new Date(bits[0], bits[1] - 1, bits[2], 12);
+      var events = CalendarApp.getDefaultCalendar().getEventsForDay(day);
+      // Public API receives only a boolean, never the reason or calendar data.
+      return ContentService.createTextOutput(JSON.stringify({
+        ok: true, status: 'availability', blocked: bookingBlockKind_(events) !== ''
+      })).setMimeType(ContentService.MimeType.JSON);
+    } catch (_) {
+      console.error('Calendar availability unavailable; no private data logged');
+      return output_(false, 'calendar_unavailable');
+    }
+  }
 
   if (body.action === 'assess') {
     // Read ONLY the single owner's shared calendar. Never send event contents
@@ -45,7 +79,8 @@ function doPost(e) {
       return ContentService.createTextOutput(JSON.stringify({
         ok: true, status: 'assessment',
         other_count: Math.min(otherCount, 1000),
-        dj_event: djEvent, free_saturday: freeSaturday
+        dj_event: djEvent, free_saturday: freeSaturday,
+        booking_block: bookingBlockKind_(events) !== ''
       })).setMimeType(ContentService.MimeType.JSON);
     } catch (_) {
       console.error('Private calendar assessment unavailable; no details logged');
