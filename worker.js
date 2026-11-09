@@ -236,6 +236,42 @@ async function syncBookingCalendar(date, env) {
  * Owner-only, read-only date assessment. Does not touch confirmed bookings.
  * A failed calendar bridge is "unavailable", NEVER "available".
  */
+
+/** Shared authenticated bridge request: private actions never return event details. */
+async function privateCalendarAction(action, date, env, extra = {}) {
+  if (env.BOOKING_CALENDAR_SYNC_ENABLED !== "true" ||
+      typeof env.BOOKING_CALENDAR_BRIDGE_TOKEN !== "string" ||
+      env.BOOKING_CALENDAR_BRIDGE_TOKEN.length < 32 ||
+      typeof env.BOOKING_CALENDAR_APPS_SCRIPT_URL !== "string" ||
+      !/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(env.BOOKING_CALENDAR_APPS_SCRIPT_URL)) {
+    return null;
+  }
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 12000);
+  try {
+    const response = await fetch(env.BOOKING_CALENDAR_APPS_SCRIPT_URL, {
+      method: "POST", redirect: "follow",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        token: env.BOOKING_CALENDAR_BRIDGE_TOKEN, action, date, ...extra
+      }),
+      signal: controller.signal
+    });
+    return response.ok ? await response.json().catch(() => null) : null;
+  } catch (_) {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/** Small date-only shift predictor. This is not a confirmed work roster. */
+function expectedShift(date) {
+  const week = Math.floor((Date.parse(date + "T00:00:00Z") -
+    Date.parse("2026-11-09T00:00:00Z")) / (7 * 86400000));
+  return week % 2 === 0 ? "afternoon" : "morning";
+}
+
 async function assessBookingDate(date, env) {
   let calendar = { state: "unavailable" };
   if (env.BOOKING_CALENDAR_SYNC_ENABLED === "true" &&
@@ -261,13 +297,20 @@ async function assessBookingDate(date, env) {
           data.other_count >= 0 && data.other_count <= 1000 &&
           typeof data.dj_event === "boolean" &&
           typeof data.free_saturday === "boolean" &&
-          typeof data.booking_block === "boolean") {
+          typeof data.booking_block === "boolean" &&
+          Number.isSafeInteger(data.before_15) && data.before_15 >= 0 &&
+          Number.isSafeInteger(data.after_15) && data.after_15 >= 0 &&
+          Number.isSafeInteger(data.all_day) && data.all_day >= 0 &&
+          data.before_15 + data.after_15 + data.all_day === data.other_count) {
         calendar = {
           state: "ok",
           other_count: data.other_count,
           dj_event: data.dj_event,
           free_saturday: data.free_saturday,
-          booking_block: data.booking_block
+          booking_block: data.booking_block,
+          before_15: data.before_15,
+          after_15: data.after_15,
+          all_day: data.all_day
         };
       }
     } catch (_) {
@@ -276,15 +319,9 @@ async function assessBookingDate(date, env) {
       clearTimeout(timer);
     }
   }
-  // 2026-11-09 Monday = afternoon, 2026-11-16 Monday = morning.
-  // This is a week-type prediction, NOT a verified day-off or swap.
-  const days = Math.floor(
-    (Date.parse(date + "T00:00:00Z") - Date.parse("2026-11-09T00:00:00Z")) / 86400000
-  );
-  const week = Math.floor(days / 7);
   return {
     calendar,
-    predicted_shift: week % 2 === 0 ? "afternoon" : "morning",
+    predicted_shift: expectedShift(date),
     actual_work_schedule_known: false
   };
 }
@@ -375,6 +412,60 @@ async function managePrivateDates(request, env) {
       });
     }
 
+    if (payload.action === "audit") {
+      // Private 31-day window only. Return booleans and dates, never titles.
+      // Never mutate D1 or Calendar.
+      const start = validDate(payload.date) ? payload.date : today;
+      if (start < today || start > last) return reply({ error: "invalid_date" }, 400);
+      const days = 31;
+      const windowLast = new Date(Date.parse(start + "T00:00:00Z") + (days - 1) * 86400000)
+        .toISOString().slice(0, 10);
+      if (windowLast > last) return reply({ error: "out_of_range" }, 400);
+      const [rows, calendar] = await Promise.all([
+        env.DB.prepare("SELECT date FROM booked_dates WHERE date >= ? AND date <= ? ORDER BY date")
+          .bind(start, windowLast).all(),
+        privateCalendarAction("audit", start, env, { days })
+      ]);
+      if (!rows.success || !Array.isArray(rows.results)) throw Error("D1 audit failed");
+      if (!calendar || calendar.ok !== true || calendar.status !== "audit" ||
+          !Array.isArray(calendar.days) || calendar.days.length !== days) {
+        return reply({ status: "ok", calendar_state: "unavailable", checks: [] });
+      }
+      const booked = new Set(rows.results.map(x => x.date));
+      const checks = calendar.days.map((x, i) => {
+        const expected = new Date(Date.parse(start + "T00:00:00Z") + i * 86400000)
+          .toISOString().slice(0, 10);
+        if (!x || x.date !== expected || typeof x.dj !== "boolean" ||
+            typeof x.closed !== "boolean") throw Error("invalid audit response");
+        const inD1 = booked.has(expected);
+        const issue = inD1 && !x.dj && !x.closed ? "missing_calendar_block" :
+          !inD1 && x.dj ? "calendar_only_dj" : "ok";
+        return { date: expected, issue, d1: inD1, calendar_dj: x.dj, calendar_closure: x.closed };
+      });
+      return reply({ status: "ok", calendar_state: "ok", checks });
+    }
+
+    if (payload.action === "cancel_preview") {
+      const date = payload.date;
+      if (!validDate(date) || date < today || date > last) {
+        return reply({ error: "invalid_date" }, 400);
+      }
+      const [d1, calendar] = await Promise.all([
+        env.DB.prepare("SELECT date FROM booked_dates WHERE date = ? LIMIT 1").bind(date).first(),
+        privateCalendarAction("assess", date, env)
+      ]);
+      if (!calendar || calendar.ok !== true || calendar.status !== "assessment" ||
+          typeof calendar.booking_block !== "boolean" ||
+          typeof calendar.dj_event !== "boolean") {
+        return reply({ status: "ok", date, action: "cancel_preview", safety: "unavailable" });
+      }
+      return reply({
+        status: "ok", date, action: "cancel_preview",
+        safety: d1 ? "requires_review" : calendar.booking_block ? "calendar_only" : "clear",
+        in_d1: !!d1, calendar_blocked: calendar.booking_block
+      });
+    }
+
     if (payload.action === "export") {
       // A private, read-only snapshot of the date-only booking table.
       // Include historical dates so a downloaded backup is complete.
@@ -411,18 +502,36 @@ async function managePrivateDates(request, env) {
     if (!validDate(date) || date < today || date > last) {
       return reply({ error: "invalid_date" }, 400);
     }
-    const query = payload.action === "book"
-      ? "INSERT OR IGNORE INTO booked_dates (date) VALUES (?)"
-      : "DELETE FROM booked_dates WHERE date = ?";
-    const update = await env.DB.prepare(query).bind(date).run();
-    if (!update.success) throw new Error("D1 update was unsuccessful");
-    // Only an explicitly approved booking is eligible for automatic creation.
-    // Re-booking an existing date safely retries pending calendar sync.
-    // Releasing dates never deletes calendar entries without human review.
-    const calendarSync = payload.action === "book"
-      ? await syncBookingCalendar(date, env)
-      : "manual_review";
-    return reply({ status: "ok", date, action: payload.action, calendar_sync: calendarSync });
+    if (payload.action === "release") {
+      // Explicit confirmation by owner is handled in the private UI.
+      // The Calendar script only removes an event proven to be written by
+      // bridge v2. Legacy/manual/closure events are never removed.
+      const existing = await env.DB.prepare("SELECT date FROM booked_dates WHERE date = ? LIMIT 1")
+        .bind(date).first();
+      if (!existing) {
+        return reply({ status: "ok", date, action: "release", result: "not_in_d1",
+          message: "No D1 booking to release; Calendar was not touched." });
+      }
+      const calendar = await privateCalendarAction("cancel", date, env);
+      if (!calendar || calendar.ok !== true ||
+          (calendar.status !== "cancelled" && calendar.status !== "clear")) {
+        return reply({ status: "ok", date, action: "release", result: "manual_review",
+          message: "Calendar event not safely removable: D1 remains booked." });
+      }
+      // D1 is only released after confirmation that no calendar block remains.
+      const update = await env.DB.prepare("DELETE FROM booked_dates WHERE date = ?")
+        .bind(date).run();
+      if (!update.success) throw Error("D1 release failed");
+      return reply({ status: "ok", date, action: "release", result: "released" });
+    }
+
+    const update = await env.DB.prepare(
+      "INSERT OR IGNORE INTO booked_dates (date) VALUES (?)"
+    ).bind(date).run();
+    if (!update.success) throw Error("D1 insert failed");
+    // A failed Google sync is reported separately, D1 remains booked.
+    const calendarSync = await syncBookingCalendar(date, env);
+    return reply({ status: "ok", date, action: "book", calendar_sync: calendarSync });
   } catch (error) {
     console.error("Private date management failed:", error?.name || "unknown");
     return reply({ error: "unavailable" }, 503);
