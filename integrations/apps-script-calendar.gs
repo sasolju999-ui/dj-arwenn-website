@@ -21,7 +21,38 @@ function doPost(e) {
   try { body = JSON.parse(raw); } catch (_) { return output_(false, 'invalid_json'); }
   if (!body || typeof body !== 'object' ||
       !equals_(String(body.token || ''), expected)) return output_(false, 'forbidden');
-  if (body.action !== 'book' || !dateValid_(body.date)) return output_(false, 'invalid_action');
+  if (!dateValid_(body.date)) return output_(false, 'invalid_date');
+
+  if (body.action === 'assess') {
+    // Read ONLY the single owner's shared calendar. Never send event contents
+    // (names, notes, guests, medical details or location) to the Worker.
+    var parts = body.date.split('-').map(Number);
+    var checkDay = new Date(parts[0], parts[1] - 1, parts[2], 12);
+    try {
+      var events = CalendarApp.getDefaultCalendar().getEventsForDay(checkDay);
+      var otherCount = 0, djEvent = false, freeSaturday = false;
+      for (var j = 0; j < events.length; j++) {
+        var title = events[j].getTitle();
+        if (/DJ Arwenn/i.test(title)) { djEvent = true; continue; }
+        if (/Sašo\s*[–-]\s*(dopoldanska|popoldanska)/i.test(title) ||
+            /Lara\s*[–-]\s*(dopoldanska|popoldanska)/i.test(title)) continue;
+        if (/Sašo\s*[–-]\s*prosta sobota/i.test(title)) {
+          freeSaturday = true;
+          continue;
+        }
+        otherCount++;
+      }
+      return ContentService.createTextOutput(JSON.stringify({
+        ok: true, status: 'assessment',
+        other_count: Math.min(otherCount, 1000),
+        dj_event: djEvent, free_saturday: freeSaturday
+      })).setMimeType(ContentService.MimeType.JSON);
+    } catch (_) {
+      console.error('Private calendar assessment unavailable; no details logged');
+      return output_(false, 'calendar_unavailable');
+    }
+  }
+  if (body.action !== 'book') return output_(false, 'invalid_action');
 
   var lock = LockService.getScriptLock();
   if (!lock.tryLock(10000)) return output_(false, 'busy');
