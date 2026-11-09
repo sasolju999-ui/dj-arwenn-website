@@ -81,9 +81,16 @@
       <p class="hint">Dodaj samo potrjene rezervacije. Povpraševanje še ne pomeni zasedenega termina.</p>
       <button id="assess" type="button" class="secondary" style="width:100%;margin:0 0 12px">🔎 PREVERI TERMIN (BREZ SPREMEMB)</button>
       <div id="assessment" class="hint" role="status" aria-live="polite" hidden></div>
-      <div class="row"><button id="book" type="button">OZNAČI KOT ZASEDENO</button><button id="release" class="secondary" type="button">SPROSTI DATUM</button></div>
+      <div class="row"><button id="book" type="button">OZNAČI KOT ZASEDENO</button><button id="release" class="secondary" type="button">VARNO ODPOVEJ / SPROSTI</button></div>
+      <p class="hint">Pri odpovedi se samodejno odstranijo samo novi dogodki, ki jih je ustvaril Booking Bridge v2. Stare rezervacije in ročni koledarski vpisi ostanejo za ročni pregled.</p>
       <button id="calendar-diagnostics" class="secondary" type="button" style="width:100%;margin-top:12px">PREVERI POVEZAVO S KOLEDARJEM</button>
       <p class="hint">Preverjanje ne spreminja rezervacij in ne prikazuje skrivnih vrednosti.</p>
+    </section>
+    <section class="card">
+      <h2>Pregled usklajenosti (31 dni)</h2>
+      <p class="hint">Preveri prihajajoče datume od izbranega dne. Ugotovi, kateri DJ nastopi so v koledarju, manjkajo pa v D1, ali obratno. Ne spreminja nobenega dogodka.</p>
+      <button id="audit" class="secondary" type="button" style="width:100%">🔎 PREVERI USKLAJENOST</button>
+      <div id="audit-result" class="hint" role="status" aria-live="polite" style="white-space:pre-wrap;margin-top:12px" hidden></div>
     </section>
     <section class="card">
       <div class="row"><h2>Varnostna kopija</h2></div>
@@ -137,7 +144,7 @@
   }
   function setBusy(value){
     busy=value;
-    ['sign-in','book','release','refresh','backup','calendar-diagnostics','assess'].forEach(id=>el(id).disabled=value);
+    ['sign-in','book','release','refresh','backup','calendar-diagnostics','assess','audit'].forEach(id=>el(id).disabled=value);
   }
   async function refresh(){
     const data=await call('list');
@@ -162,7 +169,27 @@
   }
   async function change(action, date){
     if(!date||date<earliest||date>latest){notice('Izberi veljaven datum.');return}
-    if(action==='release'&&!confirm('Res želiš sprostiti '+fmt(date)+'?'))return;
+    if(action==='release') {
+      // Preflight is read-only and cannot silently clear a calendar block.
+      await run(async()=>{
+        const preview=await call('cancel_preview',date);
+        if(preview.safety==='unavailable')throw Error('Koledarja ni mogoče zanesljivo preveriti. Datum ostane zaprt.');
+        if(preview.safety==='calendar_only'){
+          notice('Ta datum ni v D1, vendar ima koledarsko zaporo. Za ročno ustvarjen nastop ali dopust uredi dogodek neposredno v Google Koledarju.');
+          return;
+        }
+        if(preview.safety==='clear'){
+          notice('V D1 ni rezervacije in v koledarju ni DJ zapore. Ničesar nisem spreminjala.',true);
+          return;
+        }
+        if(!confirm('Želiš odpovedati potrjen nastop '+fmt(date)+'? Samodejno se izbriše samo dokazano lastni koledarski vpis v2. Pri starih/ročnih vpisih ostane datum zaprt.'))return;
+        const result=await call('release',date);
+        await refresh();
+        if(result.result==='released')notice('Termin '+fmt(date)+' je varno sproščen v D1 in preverjen v koledarju.',true);
+        else notice('Datum ostaja zaprt. Stare ali ročno ustvarjene koledarske dogodke moraš pregledati in urediti ročno. Nisem odstranila rezervacije iz D1.');
+      });
+      return;
+    }
     if(action==='book'&&!confirm('Označim '+fmt(date)+' kot ZASEDENO? To blokira nova povpraševanja za ta datum.'))return;
     await run(async()=>{
       const data=await call(action,date);
@@ -238,6 +265,10 @@
       'Koledarska zapora: '+(cal.state!=='ok'?'NI PREVERJENA':cal.booking_block?'DA – rezervacija ali izrecna zapora':'NE'),
       'Povratna povezava za spletno stran: '+(data.calendar_reverse==='disabled'?'Še ni vklopljena':data.calendar_reverse==='blocked'?'DATUM ZAPRT':data.calendar_reverse==='open'?'Brez koledarske zapore':'NAPAKA – NEPREVERJENO'),
       'Drugi vpisi v koledarju: '+(cal.state==='ok'?cal.other_count:'NI PREVERJENO – Apps Script je lahko še na stari različici'),
+      'Osebne obveznosti do 15.00: '+(cal.state==='ok'&&Number.isInteger(cal.before_15)?cal.before_15:'NI PREVERJENO'),
+      'Osebne obveznosti po 15.00 oziroma čez 15.00: '+(cal.state==='ok'&&Number.isInteger(cal.after_15)?cal.after_15:'NI PREVERJENO'),
+      'Celodnevne druge obveznosti: '+(cal.state==='ok'&&Number.isInteger(cal.all_day)?cal.all_day:'NI PREVERJENO'),
+      'Zasebna ocena: '+(cal.state!=='ok'?'NI PODATKOV':(cal.after_15||cal.all_day)?'PREVERI MOREBITEN KONFLIKT':data.predicted_shift==='afternoon'&&!cal.free_saturday?'MOŽNA MENJAVA IZMENE':'Ni vidnega časovnega konflikta; urnik vseeno ni potrjen'),
       'Dopust, osebne obveznosti in menjave: preveri pred potrditvijo.'
     ];
     if(cal.state==='ok'&&cal.dj_event&&data.booking!=='booked')
@@ -249,7 +280,25 @@
     target.hidden=false;
     notice('Preverjanje zaključeno – brez spreminjanja rezervacij.',true);
   }));
-  dateField.addEventListener('change',()=>{el('assessment').hidden=true;});
+  el('audit').addEventListener('click',()=>run(async()=>{
+    const first=dateField.value||earliest;
+    const data=await call('audit',first);
+    const target=el('audit-result');
+    if(data.calendar_state!=='ok'){
+      target.textContent='Koledar trenutno ni na voljo ali Apps Script še ni posodobljen. Ničesar nisem spreminjala.';
+    }else{
+      const problems=data.checks.filter(x=>x.issue!=='ok');
+      target.textContent=problems.length===0
+        ? 'Ni najdenih neskladij v obdobju 31 dni od '+fmt(first)+'. To ne preverja zasebnih obveznosti.'
+        : 'Najdena neskladja ('+problems.length+'):\n'+problems.map(x=>
+          fmt(x.date)+' – '+(x.issue==='calendar_only_dj'
+            ? 'DJ nastop samo v koledarju (javni datum je zaprt)'
+            : 'D1 rezervacija brez DJ zapore v koledarju')).join('\n');
+    }
+    target.hidden=false;
+    notice('Zasebni pregled zaključen; brez sprememb.',true);
+  }));
+  dateField.addEventListener('change',()=>{el('assessment').hidden=true;el('audit-result').hidden=true;});
   el('book').addEventListener('click',()=>change('book',dateField.value));
   el('release').addEventListener('click',()=>change('release',dateField.value));
   el('make-key').addEventListener('click',()=>{
