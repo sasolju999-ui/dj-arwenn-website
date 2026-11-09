@@ -300,15 +300,19 @@
         return;
       }
       submitButton.disabled = true;
-      if (window.DJArwennAvailability && choose('event-date')?.value) {
-        const statusOfDate = await window.DJArwennAvailability.lookup(choose('event-date').value);
-        if (statusOfDate === 'booked') {
-          status.hidden = false;
-          status.dataset.state = 'error';
-          status.textContent = strings[lang].formBooked;
-          submitButton.disabled = false;
-          return;
-        }
+      // Mandatory live single-date check for BOTH Turnstile and Web3Forms.
+      // Unknown/unreachable/rate-limited never means available, and the
+      // fallback must not bypass a confirmed Calendar booking block.
+      const selectedBookingDate = choose('event-date')?.value || '';
+      const statusOfDate = window.DJArwennAvailability && selectedBookingDate
+        ? await window.DJArwennAvailability.lookup(selectedBookingDate, { fresh:true })
+        : 'unknown';
+      if (statusOfDate !== 'enquiries_open') {
+        showFormIssue(statusOfDate === 'booked' ? strings[lang].formBooked
+          : statusOfDate === 'rate_limited' ? strings[lang].formSlowDown
+          : strings[lang].formUnavailable);
+        submitButton.disabled = false;
+        return;
       }
       const formData = new FormData(bookingForm);
       if (formData.get('botcheck')) { submitButton.disabled = false; return; }
