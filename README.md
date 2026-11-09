@@ -221,3 +221,10 @@ is unknown (usually after 16:00). The Google endpoint uses the owner's
 Google Calendar OAuth authorization; it is not automatically authorized by
 connecting Calendar in ChatGPT. The Google Apps Script endpoint itself must be
 deployed manually, and this PR alone does NOT activate the integration.
+
+
+## DJ Booking Assistant v1 (zasebni vpogled)
+
+V skrbniski strani `/admin.html` je na voljo gumb **PREVERI TERMIN (BREZ SPREMEMB)**. Po prijavi uporabi D1 za stanje potrjenih rezervacij in 14-dnevni izmenski cikel za **predvideno** izmeno. Ce je Apps Script posodobljen, dobi se anonimni povzetek: stevilo drugih koledarskih vpisov, obstoj DJ dogodka in oznako `Saso - prosta sobota`, ce je uporabnik ta dan rocno potrdil. Ne vraca imen dogodkov, opomb, gostov ali lokacij. Drugih vpisov ne obravnava kot samodejno prepoved nastopa.
+
+Za aktivacijo koledarskega dela v obstojecem projektu Google Apps Script **DJ Arwenn – Calendar Bridge** posodobi `integrations/apps-script-calendar.gs` in izdaj **novo razlicico iste spletne aplikacije** (Manage deployments -> Edit -> New version -> Deploy). Nastavitev kljucev ni treba spreminjati. Dokler Apps Script ni posodobljen, preverjanje vrne `NI PREVERJENO`, nikoli `prosto`. Javni obrazec ter postopek zapisa/izbrisa potrjenih DJ rezervacij ostajata nespremenjena. Predvidena izmena ni potrjen sluzbeni urnik. Poletna zapora povprasevanj in evidenca menjav sta loceni prihodnji funkciji, ne del te prve verzije.

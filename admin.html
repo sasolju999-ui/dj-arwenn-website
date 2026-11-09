@@ -79,6 +79,8 @@
       <label for="event-date">Datum dogodka</label>
       <input id="event-date" type="date" required>
       <p class="hint">Dodaj samo potrjene rezervacije. Povpraševanje še ne pomeni zasedenega termina.</p>
+      <button id="assess" type="button" class="secondary" style="width:100%;margin:0 0 12px">🔎 PREVERI TERMIN (BREZ SPREMEMB)</button>
+      <div id="assessment" class="hint" role="status" aria-live="polite" hidden></div>
       <div class="row"><button id="book" type="button">OZNAČI KOT ZASEDENO</button><button id="release" class="secondary" type="button">SPROSTI DATUM</button></div>
       <button id="calendar-diagnostics" class="secondary" type="button" style="width:100%;margin-top:12px">PREVERI POVEZAVO S KOLEDARJEM</button>
       <p class="hint">Preverjanje ne spreminja rezervacij in ne prikazuje skrivnih vrednosti.</p>
@@ -114,7 +116,7 @@
   function lock(){
     token='';tokenField.value='';tokenField.type='password';
     el('generated-key').value='';el('generated-tools').hidden=true;el('generated-help').hidden=true;
-    manager.hidden=true;login.hidden=false;datesList.replaceChildren();
+    manager.hidden=true;login.hidden=false;datesList.replaceChildren();el('assessment').hidden=true;
     notice('Upravljanje je zaklenjeno.');
   }
   async function call(action, date){
@@ -135,7 +137,7 @@
   }
   function setBusy(value){
     busy=value;
-    ['sign-in','book','release','refresh','backup','calendar-diagnostics'].forEach(id=>el(id).disabled=value);
+    ['sign-in','book','release','refresh','backup','calendar-diagnostics','assess'].forEach(id=>el(id).disabled=value);
   }
   async function refresh(){
     const data=await call('list');
@@ -216,8 +218,36 @@
     ];
     const okay=flags.enabled&&flags.token_format_valid&&flags.url_format_valid;
     verdict.push(okay?'Oblika nastavitev je pravilna. To še ne preveri dostopa do Googla.':'Popravi navedene nastavitve v Cloudflare, shrani in Deploy.');
-    notice(verdict.join('\\n'),okay);
+    notice(verdict.join('\n'),okay);
   }));
+
+  el('assess').addEventListener('click',()=>run(async()=>{
+    const date=dateField.value;
+    if(!date||date<earliest||date>latest)throw Error('Izberi veljaven datum.');
+    const data=await call('assess',date);
+    const cal=data.calendar||{};
+    const shift=data.predicted_shift==='afternoon'
+      ? 'POPOLDANSKA: Sašo 13.30–20.10, Lara 14.00–20.30'
+      : 'DOPOLDANSKA: Sašo 7.30–14.10, Lara 6.00–14.00';
+    const lines=[
+      'Datum: '+fmt(date),
+      'DJ rezervacija: '+(data.booking==='booked'?'POTRJENA – ZASEDENO':'V D1 ni potrjene rezervacije'),
+      'Predvidena izmena: '+shift,
+      'Službeni urnik: NI POTRJEN za ta dan (prosta sobota/menjave niso samodejno znane)',
+      'Prosta sobota: '+(cal.state!=='ok'?'NI PREVERJENA':cal.free_saturday?'Izrecno označena v koledarju':'Ni potrditve'),
+      'Drugi vpisi v koledarju: '+(cal.state==='ok'?cal.other_count:'NI PREVERJENO – Apps Script je lahko še na stari različici'),
+      'Dopust, osebne obveznosti in menjave: preveri pred potrditvijo.'
+    ];
+    if(cal.state==='ok'&&cal.dj_event&&data.booking!=='booked')
+      lines.push('OPOZORILO: DJ dogodek je v koledarju, ne pa v D1!');
+    lines.push('PREGLED NE POMENI, DA JE DATUM PROST.');
+    const target=el('assessment');
+    target.textContent=lines.join('\n');
+    target.style.whiteSpace='pre-wrap';
+    target.hidden=false;
+    notice('Preverjanje zaključeno – brez spreminjanja rezervacij.',true);
+  }));
+  dateField.addEventListener('change',()=>{el('assessment').hidden=true;});
   el('book').addEventListener('click',()=>change('book',dateField.value));
   el('release').addEventListener('click',()=>change('release',dateField.value));
   el('make-key').addEventListener('click',()=>{
