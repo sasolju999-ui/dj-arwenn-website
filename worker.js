@@ -182,6 +182,62 @@ async function syncBookingCalendar(date, env) {
   }
 }
 
+
+/**
+ * Owner-only, read-only date assessment. Does not touch confirmed bookings.
+ * A failed calendar bridge is "unavailable", NEVER "available".
+ */
+async function assessBookingDate(date, env) {
+  let calendar = { state: "unavailable" };
+  if (env.BOOKING_CALENDAR_SYNC_ENABLED === "true" &&
+      typeof env.BOOKING_CALENDAR_BRIDGE_TOKEN === "string" &&
+      env.BOOKING_CALENDAR_BRIDGE_TOKEN.length >= 32 &&
+      typeof env.BOOKING_CALENDAR_APPS_SCRIPT_URL === "string" &&
+      /^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(env.BOOKING_CALENDAR_APPS_SCRIPT_URL)) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 10000);
+    try {
+      const response = await fetch(env.BOOKING_CALENDAR_APPS_SCRIPT_URL, {
+        method: "POST",
+        redirect: "follow",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          token: env.BOOKING_CALENDAR_BRIDGE_TOKEN, action: "assess", date
+        }),
+        signal: controller.signal
+      });
+      const data = response.ok ? await response.json().catch(() => null) : null;
+      if (data && data.ok === true && data.status === "assessment" &&
+          Number.isSafeInteger(data.other_count) &&
+          data.other_count >= 0 && data.other_count <= 1000 &&
+          typeof data.dj_event === "boolean" &&
+          typeof data.free_saturday === "boolean") {
+        calendar = {
+          state: "ok",
+          other_count: data.other_count,
+          dj_event: data.dj_event,
+          free_saturday: data.free_saturday
+        };
+      }
+    } catch (_) {
+      // No logged personal calendar contents, credential or request details.
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+  // 2026-11-09 Monday = afternoon, 2026-11-16 Monday = morning.
+  // This is a week-type prediction, NOT a verified day-off or swap.
+  const days = Math.floor(
+    (Date.parse(date + "T00:00:00Z") - Date.parse("2026-11-09T00:00:00Z")) / 86400000
+  );
+  const week = Math.floor(days / 7);
+  return {
+    calendar,
+    predicted_shift: week % 2 === 0 ? "afternoon" : "morning",
+    actual_work_schedule_known: false
+  };
+}
+
 async function managePrivateDates(request, env) {
   if (request.method !== "POST") return reply({ error: "method_not_allowed" }, 405);
   if (!env.DB || typeof env.DJ_ARWENN_ADMIN_TOKEN !== "string" ||
@@ -249,6 +305,21 @@ async function managePrivateDates(request, env) {
     const end = new Date(today + "T00:00:00Z");
     end.setUTCFullYear(end.getUTCFullYear() + 2);
     const last = end.toISOString().slice(0, 10);
+
+    if (payload.action === "assess") {
+      const date = payload.date;
+      if (!validDate(date) || date < today || date > last) {
+        return reply({ error: "invalid_date" }, 400);
+      }
+      const booking = await env.DB.prepare(
+        "SELECT date FROM booked_dates WHERE date = ? LIMIT 1"
+      ).bind(date).first();
+      return reply({
+        status: "ok", date,
+        booking: booking ? "booked" : "not_booked",
+        ...(await assessBookingDate(date, env))
+      });
+    }
 
     if (payload.action === "export") {
       // A private, read-only snapshot of the date-only booking table.
