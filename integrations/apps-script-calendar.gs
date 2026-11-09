@@ -9,7 +9,8 @@
  *
  * Creates only explicitly owner-confirmed all-day bookings.
  * Existing same-day DJ Arwenn events are left untouched to avoid duplicates.
- * Cancellation deletes ONLY exactly one verified bridge-managed v2 event.
+ * Cancellation deletes ONLY exactly one v2 event with both the private
+ * script-property ID ledger and the managed description marker.
  * Older/manual bookings require human review and are never deleted automatically.
  * New action "availability" returns only whether an explicitly named
  * Calendar event blocks the date, never personal event details.
@@ -33,6 +34,7 @@ function bookingBlockKind_(events) {
 
 /** Versioned proof that this script created the event, not a human. */
 var DJ_BRIDGE_MARKER_V2_ = '[DJ_ARWENN_BRIDGE_MANAGED_V2]';
+function managedKey_(date) { return 'DJ_ARWENN_BRIDGE_MANAGED_EVENT_' + date; }
 
 function djBookingTitle_(title) {
   return /^\s*(?:🎧\s*)?DJ Arwenn\s*[–-]\s*rezerviran nastop(?:\s|$|[(:–-])/i.test(String(title || ''));
@@ -179,12 +181,14 @@ function doPost(e) {
       // require human review because their provenance cannot be established.
       var managed = [];
       var allDjBookings = 0;
+      var ledgerId = props.getProperty(managedKey_(date));
       for (var k = 0; k < existing.length; k++) {
         var item = existing[k], title = item.getTitle();
         if (djClosureTitle_(title)) return output_(false, 'manual_review');
         if (!djBookingTitle_(title)) continue;
         allDjBookings++;
-        if (item.isAllDayEvent() &&
+        if (ledgerId && item.getId() === ledgerId &&
+            item.isAllDayEvent() &&
             String(item.getDescription() || '').indexOf(DJ_BRIDGE_MARKER_V2_) !== -1) {
           managed.push(item);
         }
@@ -192,7 +196,10 @@ function doPost(e) {
       if (allDjBookings > 0 && (allDjBookings !== 1 || managed.length !== 1)) {
         return output_(false, 'manual_review');
       }
-      if (managed.length === 1) managed[0].deleteEvent();
+      if (managed.length === 1) {
+        managed[0].deleteEvent();
+        props.deleteProperty(managedKey_(date));
+      }
       // Re-read after mutation. D1 is released only if no Calendar block remains.
       var after = calendar.getEventsForDay(day);
       if (bookingBlockKind_(after) !== '') return output_(false, 'manual_review');
@@ -213,6 +220,9 @@ function doPost(e) {
       }
     );
     event.setGuestsCanModify(true);
+    // Event description alone is not proof of ownership. Store the exact
+    // Calendar event ID privately for cancellation, never in GitHub/D1.
+    props.setProperty(managedKey_(date), event.getId());
     return output_(true, 'created');
   } catch (err) {
     console.error('Calendar sync failed; date and secrets omitted');
