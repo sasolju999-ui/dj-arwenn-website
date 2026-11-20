@@ -1262,7 +1262,8 @@ html{scroll-padding-top:88px}
 /* Match the site's card typography on desktop. */
 @media (min-width: 881px) {
   .collaboration-step h3,
-  .music-direction h3 {
+  .music-direction h3,
+  .footer-social h3 {
     font-family: Inter, "Segoe UI", Arial, sans-serif;
     font-stretch: normal;
     font-size: 18px;
